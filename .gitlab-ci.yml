@@ -1,0 +1,18 @@
+stages:
+  - build
+  - push
+
+docker-compose-build:
+  stage: build
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - docker build -t gitlab-registry.ozon.dev/78945qw/homework/orders-service:latest -f ./src/Ozon.Route256.Five.OrderService/Dockerfile ./src/Ozon.Route256.Five.OrderService
+
+docker-compose-build-push:
+  stage: push
+  when: manual
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - docker push gitlab-registry.ozon.dev/78945qw/homework/orders-service:latest
