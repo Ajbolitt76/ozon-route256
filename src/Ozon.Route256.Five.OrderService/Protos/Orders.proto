@@ -1,0 +1,18 @@
+syntax = "proto3";
+option csharp_namespace = "Ozon.Route256.Five";
+
+service Orders
+{
+    rpc GetOrder(GetOrderByIdRequest) returns (GetOrderByIdResponse);
+}
+
+message GetOrderByIdRequest
+{
+    int32 id = 1;
+}
+
+message GetOrderByIdResponse
+{
+    //TODO: Описание модели в следующих заданиях
+    int32 id = 1;
+}
