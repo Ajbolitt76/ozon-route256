@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{6B6E6F
 		.gitlab-ci.yml = .gitlab-ci.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{3FEADEAE-8600-4D4D-B4E4-C32134E6AD7C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ozon.Route256.Five.OrderService.UnitTests", "tests\Ozon.Route256.Five.OrderService.UnitTests\Ozon.Route256.Five.OrderService.UnitTests.csproj", "{49A3526D-4667-4215-BD71-C2C0E6D14718}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,11 +22,16 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{EF1E900E-287D-4057-B0F1-5E59E3CADC38} = {7F4D0410-9750-409E-8963-BC32BE127292}
+		{49A3526D-4667-4215-BD71-C2C0E6D14718} = {3FEADEAE-8600-4D4D-B4E4-C32134E6AD7C}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{EF1E900E-287D-4057-B0F1-5E59E3CADC38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EF1E900E-287D-4057-B0F1-5E59E3CADC38}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF1E900E-287D-4057-B0F1-5E59E3CADC38}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF1E900E-287D-4057-B0F1-5E59E3CADC38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49A3526D-4667-4215-BD71-C2C0E6D14718}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49A3526D-4667-4215-BD71-C2C0E6D14718}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49A3526D-4667-4215-BD71-C2C0E6D14718}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49A3526D-4667-4215-BD71-C2C0E6D14718}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

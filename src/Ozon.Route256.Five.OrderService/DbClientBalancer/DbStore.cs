@@ -6,6 +6,8 @@ public class DbStore : IDbStore
 
     private int _currentIndex = -1;
 
+    public IReadOnlyCollection<DbEndpoint> Endpoints => _endpoints;
+
     public Task SetEndpointList(IReadOnlyCollection<DbEndpoint> newEndpoints)
     {
         _endpoints = newEndpoints.ToArray();
