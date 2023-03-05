@@ -1,19 +1,8 @@
+using Ozon.Route256.Five.OrderService.Model;
+
 namespace Ozon.Route256.Five.OrderService.Contracts.GetAllOrdersForClient;
 
-public record GetAllOrdersForClientResponse()
-{
-    private int _pageNumber;
-    private int _pageSize;
-
-    public int PageNumber
-    {
-        get => _pageNumber;
-        set => _pageNumber = value > 0 ? value : PaginationDefaults.PageNumber;
-    }
-    
-    public int PageSize
-    {
-        get => _pageSize;
-        set => _pageSize = value > 0 ? value : PaginationDefaults.PageSize;
-    }
-};
+/// <summary>
+/// Результат запроса на список заказов для клиента <see cref="GetAllOrdersForClientRequest"/>
+/// </summary>
+public record GetAllOrdersForClientResponse(IReadOnlyCollection<GetAllOrdersForClientResponseItem> Orders);

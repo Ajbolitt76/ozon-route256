@@ -1,4 +1,7 @@
 namespace Ozon.Route256.Five.OrderService.Contracts.GetOrders;
 
-//TODO: Описание функционала и полей в будущих воркшопах
-public record GetOrdersResponse(List<GetOrdersOrderResponseItem> Placeholder);
+/// <summary>
+/// Ответ для запроса <see cref="GetOrdersRequest"/>
+/// </summary>
+/// <param name="Orders">Заказы</param>
+public record GetOrdersResponse(List<GetOrdersResponseItem> Orders);

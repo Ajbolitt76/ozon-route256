@@ -1,3 +1,8 @@
 namespace Ozon.Route256.Five.OrderService.Contracts.GetForRegions;
 
-public record GetForRegionsRequest(DateTime? StartDate, List<string>? Regions);
+/// <summary>
+/// Запрос на аггрегацию заказов по регионам
+/// </summary>
+/// <param name="StartDate">Дата с которой начинать аггрегировать</param>
+/// <param name="Regions">Список регионов</param>
+public record GetForRegionsRequest(DateTime? StartFrom, List<string>? Regions);

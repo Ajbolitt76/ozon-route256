@@ -1,14 +1,15 @@
 using Ozon.Route256.Five.OrderService.Model;
 
-namespace Ozon.Route256.Five.OrderService.Contracts.GetAllOrdersForClient;
+namespace Ozon.Route256.Five.OrderService.Contracts.GetOrders;
 
 /// <summary>
-/// Элемент списка заказов клиента в <see cref="GetAllOrdersForClientResponse"/>
+/// Элементы запроса <see cref="GetOrdersRequest"/>
+/// Представление заказа
 /// </summary>
-public record GetAllOrdersForClientResponseItem(
+public record GetOrdersResponseItem(
     int Id,
     uint ItemsCount,
-    decimal TotalPrice,
+    double TotalPrice,
     double TotalWeight,
     string OrderType,
     DateTime OrderedAt,

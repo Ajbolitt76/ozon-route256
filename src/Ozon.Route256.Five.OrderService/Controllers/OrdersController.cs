@@ -11,7 +11,10 @@ namespace Ozon.Route256.Five.OrderService.Controllers;
 [Route("[controller]")]
 public class OrdersController : ControllerBase
 {
-    //2.2
+    /// <summary>
+    /// Ручка получения статуса заказов
+    /// </summary>
+    /// <param name="id">Id заказа</param>
     [HttpGet("{id:long}/Status")]
     [ProducesResponseType(typeof(GetStatusResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorDescription), StatusCodes.Status404NotFound)]
@@ -21,7 +24,10 @@ public class OrdersController : ControllerBase
         return NotFound(new ErrorDescription("ORDER_NOT_FOUND", "Ваш заказ не был найден"));
     }
 
-    //2.1
+    /// <summary>
+    /// Ручка отмены заказа
+    /// </summary>
+    /// <param name="id">Id заказа</param>
     [HttpPost("{id:long}/Cancel")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorDescription), StatusCodes.Status400BadRequest)]
@@ -32,17 +38,22 @@ public class OrdersController : ControllerBase
         return NotFound(new ErrorDescription("ORDER_NOT_FOUND", "Ваш заказ не был найден"));
     }
     
-    //2.5
+    /// <summary>
+    /// Ручка получения всех заказов
+    /// </summary>
+    /// <param name="request">Запрос</param>
     [HttpGet("")]
     [ProducesResponseType(typeof(GetOrdersResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorDescription), StatusCodes.Status400BadRequest)]
     public IActionResult GetAllOrders([FromQuery]GetOrdersRequest request)
     {
         //TODO: Бизнес логика, в следующих заданиях
-        return Ok(new GetOrdersResponse(new List<GetOrdersOrderResponseItem>()));
+        return Ok(new GetOrdersResponse(new List<GetOrdersResponseItem>()));
     }
 
-    //2.6
+    /// <summary>
+    /// Ручка аггрегации закзов по регионам
+    /// </summary>
     [HttpGet("AggregateForRegions")]
     [ProducesResponseType(typeof(GetForRegionsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorDescription), StatusCodes.Status400BadRequest)]
@@ -52,7 +63,9 @@ public class OrdersController : ControllerBase
         return Ok(new GetForRegionsResponse(new List<GetForRegionsResponseItem>()));
     }
     
-    //2.7
+    /// <summary>
+    /// Ручка получения заказов клиента
+    /// </summary>
     [HttpGet("GetForCustomer")]
     [ProducesResponseType(typeof(GetAllOrdersForClientResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorDescription), StatusCodes.Status404NotFound)]

@@ -1,6 +1,13 @@
 namespace Ozon.Route256.Five.OrderService.Contracts.GetOrders;
 
-public record GetOrdersRequest(List<string>? Regions)
+/// <summary>
+/// Запрос на получение заказов
+/// </summary>
+/// <param name="Regions">Регионы для которых идет агрегация</param>
+/// <param name="IsAscending">По возрастанию</param>
+/// <param name="PageNumber">Номер страницы</param>
+/// <param name="PageSize">Размер страницы</param>
+public record GetOrdersRequest(List<string>? Regions, bool? IsAscending, int PageNumber, int PageSize)
 {
     private int _pageNumber;
     private int _pageSize;
@@ -16,6 +23,4 @@ public record GetOrdersRequest(List<string>? Regions)
         get => _pageSize;
         set => _pageSize = value > 0 ? value : PaginationDefaults.PageSize;
     }
-
-    public bool IsAscending { get; set; }
 }

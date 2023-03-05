@@ -8,7 +8,9 @@ namespace Ozon.Route256.Five.OrderService.Controllers;
 [Route("[controller]/")]
 public class DataController : ControllerBase
 {
-    //2.3
+    /// <summary>
+    /// Ручка получения списка клиентов
+    /// </summary>
     [HttpGet("Customers")]
     [ProducesResponseType(typeof(GetAllCustomersResponse), StatusCodes.Status200OK)]
     public IActionResult GetCustomers()
@@ -17,7 +19,9 @@ public class DataController : ControllerBase
         return Ok(new GetAllCustomersResponse(new List<GetAllCustomersResponseItem>()));
     }
     
-    //2.4
+    /// <summary>
+    /// Ручка получения регионов
+    /// </summary>
     [HttpGet("Regions")]
     [ProducesResponseType(typeof(GetRegionsResponse), StatusCodes.Status200OK)]
     public IActionResult GetRegions()

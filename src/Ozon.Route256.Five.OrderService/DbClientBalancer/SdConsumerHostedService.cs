@@ -1,4 +1,5 @@
 using Grpc.Core;
+using Ozon.Route256.Five.OrderService.Mappings;
 
 namespace Ozon.Route256.Five.OrderService.DbClientBalancer;
 
@@ -23,15 +24,15 @@ public class SdConsumerHostedService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            using var stream = _client.DbResources(
-                new DbResourcesRequest
-                {
-                    ClusterName = "cluster"
-                },
-                cancellationToken: stoppingToken);
-
             try
             {
+                using var stream = _client.DbResources(
+                    new DbResourcesRequest
+                    {
+                        ClusterName = "cluster"
+                    },
+                    cancellationToken: stoppingToken);
+                
                 while (await stream.ResponseStream.MoveNext(stoppingToken))
                 {
                     _logger.LogDebug(
@@ -43,7 +44,7 @@ public class SdConsumerHostedService : BackgroundService
 
                     foreach (var replica in response.Replicas)
                     {
-                        var endpoint = new DbEndpoint($"{replica.Host}:{replica.Port}", GetDbReplicaType(replica.Type));
+                        var endpoint = new DbEndpoint($"{replica.Host}:{replica.Port}", replica.Type.ToModel());
                         endpoints.Add(endpoint);
                     }
 
@@ -60,16 +61,5 @@ public class SdConsumerHostedService : BackgroundService
 
             await Task.Delay(_retryDelayMs);
         }
-    }
-
-    private static DbReplicaType GetDbReplicaType(Replica.Types.ReplicaType replicaType)
-    {
-        return replicaType switch
-        {
-            Replica.Types.ReplicaType.Master => DbReplicaType.Master,
-            Replica.Types.ReplicaType.Sync => DbReplicaType.Sync,
-            Replica.Types.ReplicaType.Async => DbReplicaType.Async,
-            _ => throw new ArgumentOutOfRangeException(nameof(replicaType), replicaType, null)
-        };
     }
 }

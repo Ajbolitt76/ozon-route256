@@ -8,7 +8,7 @@ public class DbStoreTest
     [Fact]
     public async Task Call_SetEndpointList_ShouldUpdateList()
     {
-        //A
+        // Arrange
         var dbStore = new DbStore();
         var endpoints = new List<DbEndpoint>()
         {
@@ -16,17 +16,18 @@ public class DbStoreTest
             new("test2", DbReplicaType.Master),
         };
 
-        //A
+        // Act
         await dbStore.SetEndpointList(endpoints);
 
-        //A
+        // Assert
         dbStore.Endpoints.Should().Equal(endpoints);
     }
 
     [Fact]
     public async Task Call_GetNextDbEndpointAsync_ShouldRoundRobin()
     {
-        //A
+        // Arrange
+        
         var dbStore = new DbStore();
         var endpoints = new List<DbEndpoint>()
         {
@@ -36,13 +37,13 @@ public class DbStoreTest
         };
         await dbStore.SetEndpointList(endpoints);
 
-        //A
+        // Act
         var results = await Enumerable.Range(0, endpoints.Count * 2)
             .ToAsyncEnumerable()
             .SelectAwait(async _ => await dbStore.GetNextDbEndpointAsync())
             .ToListAsync();
 
-        //A
+        // Assert 
         results.Should().Equal(Enumerable.Range(0, 2).SelectMany(_ => endpoints));
     }
 }
