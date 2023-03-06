@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "common", "common", "{6B6E6F
 		README.md = README.md
 		docker-compose.yml = docker-compose.yml
 		.gitlab-ci.yml = .gitlab-ci.yml
+		coverlet.runsettings = coverlet.runsettings
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{3FEADEAE-8600-4D4D-B4E4-C32134E6AD7C}"
