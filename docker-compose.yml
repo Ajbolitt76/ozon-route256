@@ -45,10 +45,14 @@ services:
       - customer-service
   
   service-discovery:
+    image: gitlab-registry.ozon.dev/cs/classroom-5/teachers/five/service-discovery:latest
     ports:
       - "8903:80"
     restart: unless-stopped
-    image: gitlab-registry.ozon.dev/cs/classroom-5/teachers/five/service-discovery:latest
+    environment:
+      - ROUTE256_DB_STATE=cluster:0-9:db1:1543;cluster:10-19:db2:1543;cluster1:0:db3:1543
+      - ROUTE256_UPDATE_TIMEOUT=10
+
   
   orders-database:
     image: postgres:15.2-alpine

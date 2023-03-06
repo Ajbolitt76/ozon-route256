@@ -1,0 +1,47 @@
+syntax = "proto3";
+option csharp_namespace = "Ozon.Route256.Five";
+
+import "google/protobuf/timestamp.proto";
+
+service Orders
+{
+    rpc GetOrder(GetOrderByIdRequest) returns (GetOrderByIdResponse);
+}
+
+message GetOrderByIdRequest
+{
+    int32 id = 1;
+}
+
+message GetOrderByIdResponse
+{
+    int32 id = 1;
+    uint32 items_count = 2;
+    double total_price = 3;
+    double total_weight = 4;
+    string order_type = 5;
+    google.protobuf.Timestamp ordered_at = 6;
+    OrderState order_state = 7;
+    string client_name = 8;
+    AddressDto shipping_address = 9;
+    string phone = 10;
+}
+
+enum OrderState {
+    ORDER_STATE_CREATED = 0;
+    ORDER_STATE_SENT_TO_CUSTOMER = 1;
+    ORDER_STATE_DELIVERED = 2;
+    ORDER_STATE_LOST = 3;
+    ORDER_STATE_CANCELLED = 4;
+}
+
+message AddressDto
+{
+    string region = 1;
+    string city = 2;
+    string street = 3;
+    string building = 4;
+    string apartment = 5;
+    double latitude = 6;
+    double longitude = 7;
+}
