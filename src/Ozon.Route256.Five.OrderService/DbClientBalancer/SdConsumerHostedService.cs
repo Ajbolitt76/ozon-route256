@@ -1,5 +1,6 @@
 using Grpc.Core;
 using Ozon.Route256.Five.OrderService.Mappings;
+using Ozon.Route256.Five.Sd.Grpc;
 
 namespace Ozon.Route256.Five.OrderService.DbClientBalancer;
 

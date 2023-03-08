@@ -9,6 +9,10 @@ services:
     restart: unless-stopped 
     ports:
       - "8904-8910:80"
+    environment:
+      "ConnectionStrings::SdServiceClientUrl": "http://orders-generator"
+      "ConnectionStrings::LogisticsSimulatorServiceClientUrl": "http://logistics-simulator"
+      "ConnectionStrings::CustomersClientUrl": "http://customer-service"
     deploy:
       replicas: 2
     depends_on:

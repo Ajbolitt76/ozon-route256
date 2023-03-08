@@ -7,4 +7,10 @@ namespace Ozon.Route256.Five.OrderService.Contracts.GetAllCustomers;
 /// </summary>
 /// <param name="Id">Id клиента</param>
 /// <param name="Address">Представление адреса</param>
-public record GetAllCustomersResponseItem(int Id, AddressDto Address);
+public record GetAllCustomersResponseItem(
+    int Id,
+    string FirstName,
+    string LastName,
+    string MobileNumber,
+    string Email,
+    AddressDto DefaultAddress);

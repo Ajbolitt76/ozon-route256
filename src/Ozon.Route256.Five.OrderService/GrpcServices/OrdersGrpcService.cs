@@ -1,4 +1,5 @@
 using Grpc.Core;
+using Ozon.Route256.Five.OrdersService.Grpc;
 
 namespace Ozon.Route256.Five.OrderService.GrpcServices;
 

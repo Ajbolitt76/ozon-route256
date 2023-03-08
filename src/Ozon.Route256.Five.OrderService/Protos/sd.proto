@@ -1,5 +1,5 @@
 syntax = "proto3";
-option csharp_namespace = "Ozon.Route256.Five";
+option csharp_namespace = "Ozon.Route256.Five.Sd.Grpc";
 
 import "google/protobuf/timestamp.proto";
 
