@@ -4,7 +4,7 @@ public class DbStore : IDbStore
 {
     private DbEndpoint[] _endpoints = Array.Empty<DbEndpoint>();
 
-    private int _currentIndex = -1;
+    private uint _currentIndex;
 
     public IReadOnlyCollection<DbEndpoint> Endpoints => _endpoints;
 
@@ -18,9 +18,9 @@ public class DbStore : IDbStore
     {
         var endpoints = _endpoints;
 
-        var nextIndex = Interlocked.Increment(ref _currentIndex);
-
-        nextIndex %= endpoints.Length;
+        var nextIndex = Interlocked.Increment(ref _currentIndex) - 1;
+        
+        nextIndex %= (uint)endpoints.Length;
 
         return Task.FromResult(endpoints[nextIndex]);
 

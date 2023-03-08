@@ -1,8 +1,41 @@
 stages:
+  - test
   - build
   - push
 
+unit-test:
+  image: mcr.microsoft.com/dotnet/sdk:7.0
+  before_script:
+    - dotnet tool install dotnet-reportgenerator-globaltool --tool-path tools
+  coverage: /Line coverage[\s\S].+%/
+  script: 
+    - dotnet test
+      --collect:"XPlat Code Coverage"
+      --results-directory $CI_PROJECT_DIR/TestResults 
+      --logger "junit;LogFilePath=$CI_PROJECT_DIR/TestResults/junit-test-result.xml"
+      --settings coverlet.runsettings
+      
+      ./tools/reportgenerator "-reports:${CI_PROJECT_DIR}/TestResults/**/coverage.cobertura.xml" "-targetdir:Reports_Coverage" -reportTypes:TextSummary;
+      
+      ./tools/reportgenerator "-reports:${CI_PROJECT_DIR}/TestResults/**/coverage.cobertura.xml" "-targetdir:public" -reportTypes:Html;
+      
+      cat ./Reports_Coverage/Summary.txt
+        
+  artifacts:
+    paths:
+      - $CI_PROJECT_DIR/TestResults/*/coverage.cobertura.xml
+      - $CI_PROJECT_DIR/TestResults/junit-test-result.xml
+      - public
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: $CI_PROJECT_DIR/TestResults/*/coverage.cobertura.xml
+      junit:
+        - $CI_PROJECT_DIR/TestResults/junit-test-result.xml
+
 docker-compose-build:
+  needs:
+    - unit-test
   stage: build
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
@@ -10,6 +43,8 @@ docker-compose-build:
     - docker build -t gitlab-registry.ozon.dev/78945qw/homework/orders-service:latest -f ./src/Ozon.Route256.Five.OrderService/Dockerfile ./src/Ozon.Route256.Five.OrderService
 
 docker-compose-build-push:
+  needs:
+    - docker-compose-build
   stage: push
   when: manual
   before_script:
