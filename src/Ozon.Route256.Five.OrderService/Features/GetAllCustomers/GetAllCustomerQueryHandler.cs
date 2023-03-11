@@ -27,7 +27,7 @@ public class GetAllCustomerQueryHandler : IQueryHandler<GetAllCustomerQuery, Get
                 x.LastName,
                 x.MobileNumber,
                 x.Email,
-                x.DefaultAddress.MapToModel()))
+                x.DefaultAddress.ToModel()))
             .ToList();
 
         return new GetAllCustomersResponse(responseItems);

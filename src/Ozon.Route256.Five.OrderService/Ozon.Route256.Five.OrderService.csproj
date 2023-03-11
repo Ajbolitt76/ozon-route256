@@ -14,6 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Bogus" Version="34.0.2" />
       <PackageReference Include="Google.Protobuf" Version="3.22.0" />
       <PackageReference Include="Grpc.AspNetCore" Version="2.51.0" />
       <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.51.0" />
@@ -22,6 +23,7 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="Scrutor" Version="4.2.1" />
       <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="6.5.0" />
       <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.5.0" />
       <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
@@ -32,9 +34,5 @@
         <Protobuf Include="Protos\Customers.proto" GrpcServices="Client" />
         <Protobuf Include="Protos\LogisticsSimulator.proto" GrpcServices="Client" />
         <Protobuf Include="Protos\Orders.proto" GrpcServices="Server" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Repository" />
     </ItemGroup>
 </Project>

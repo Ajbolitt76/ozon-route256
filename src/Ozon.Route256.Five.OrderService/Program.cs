@@ -1,5 +1,6 @@
 using Ozon.Route256.Five.OrderService;
 using Ozon.Route256.Five.OrderService.Configuration;
+using Ozon.Route256.Five.OrderService.Cqrs;
 using Ozon.Route256.Five.OrderService.GrpcServices;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,7 @@ builder.Services.AddGrpc(options => { options.Interceptors.Add<LoggerInterceptor
 builder.Services.AddGrpcReflection();
 builder.Services.AddGrpcClients(builder.Configuration);
 
+builder.Services.AddCqrs();
 builder.Services.AddCoreServices();
 
 builder.Services.AddControllers();
@@ -20,7 +22,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
+    app.UseSwagger(); 
     app.UseSwaggerUI();
     app.MapGrpcReflectionService();
 }

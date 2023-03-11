@@ -20,7 +20,7 @@ public class SdConsumerHostedServiceTest
     {
         _testOutputHelper = testOutputHelper;
     }
-
+    
     /// <summary>
     /// Сообщения из открытого потока, должны обрабатывться и сохранятся в DbStore
     /// </summary>
@@ -28,7 +28,6 @@ public class SdConsumerHostedServiceTest
     public async Task Handle_IncomingStream_ShouldModifyDbStore()
     {
         var serverStreamMock = new GrpcServerStreamPublisher<DbResourcesResponse>();
-
         var clientMock = new Mock<SdService.SdServiceClient>(MockBehavior.Strict);
         clientMock.Setup(
                 x => x.DbResources(

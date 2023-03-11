@@ -4,7 +4,7 @@ namespace Ozon.Route256.Five.OrderService.Mappings;
 
 public static class CustomerServiceMappings
 {
-    public static Model.AddressDto MapToModel(this Address grpcDto)
+    public static Model.AddressDto ToModel(this Address grpcDto)
         => new(
             grpcDto.Region,
             grpcDto.City,

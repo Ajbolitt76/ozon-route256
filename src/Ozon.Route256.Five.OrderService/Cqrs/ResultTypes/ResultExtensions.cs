@@ -1,4 +1,6 @@
 using System.Runtime.ExceptionServices;
+using Microsoft.AspNetCore.Mvc;
+using Ozon.Route256.Five.OrderService.Exceptions;
 
 namespace Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
 
@@ -11,7 +13,7 @@ public static class ResultExtensions
     /// <param name="successDelegate">Return if success</param>
     /// <param name="failedDelegate">Return if failed</param>
     /// <returns></returns>
-    public static TResult Handle<TResult>(this HandlerResult handlerResult, Func<TResult> successDelegate, Func<HandlerException, TResult> failedDelegate) => 
+    public static TResult Handle<TResult>(this HandlerResult handlerResult, Func<TResult> successDelegate, Func<DomainException, TResult> failedDelegate) => 
         handlerResult.Success ? successDelegate() : failedDelegate(handlerResult.Error);
 
     /// <summary>
@@ -21,8 +23,34 @@ public static class ResultExtensions
     /// <param name="successDelegate">Return if success</param>
     /// <param name="failedDelegate">Return if failed</param>
     /// <returns></returns>
-    public static TResult Handle<TResult, T>(this HandlerResult<T> handlerResult, Func<T, TResult> successDelegate, Func<HandlerException, TResult> failedDelegate) where T : class => 
+    public static TResult Handle<TResult, T>(this HandlerResult<T> handlerResult, Func<T, TResult> successDelegate, Func<DomainException, TResult> failedDelegate) where T : class => 
         handlerResult.Success ? successDelegate(handlerResult.Value) : failedDelegate(handlerResult.Error);
+
+    /// <summary>
+    /// Монадический bind для HandlerResult
+    /// </summary>
+    /// <param name="handlerResult">Результат хэндлера</param>
+    /// <param name="map">Стрелка клейсли</param>
+    public static HandlerResult<TResult> Bind<TResult, T>(this HandlerResult<T> handlerResult, Func<T, HandlerResult<TResult>> map)
+        => handlerResult switch
+        {
+            { Success: true, Value: var val } => map(val),
+            { Success: false, Error: var err } => HandlerResult<TResult>.FromError(err)
+        };
+    
+    public static IActionResult ToActionResult<T>(this HandlerResult<T> handlerResult)
+        => handlerResult switch
+        {
+            { Success: true, Value: var val } => new JsonResult(val),
+            { Success: false, Error: var err } => ExceptionHelper.ToActionResult(err)
+        };
+    
+    public static IActionResult ToActionResult(this HandlerResult handlerResult)
+        => handlerResult switch
+        {
+            { Success: true } => new OkResult(),
+            { Success: false, Error: var err } => ExceptionHelper.ToActionResult(err)
+        };
 
     /// <summary>
     /// Checks if the <see cref="HandlerResult"/> was not successful and throws the underlying exception, if available.

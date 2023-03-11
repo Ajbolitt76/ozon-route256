@@ -8,8 +8,8 @@ namespace Ozon.Route256.Five.OrderService.Contracts.GetOrders;
 /// </summary>
 public record GetOrdersResponseItem(
     int Id,
-    uint ItemsCount,
-    double TotalPrice,
+    int ItemsCount,
+    decimal TotalPrice,
     double TotalWeight,
     string OrderType,
     DateTime OrderedAt,
