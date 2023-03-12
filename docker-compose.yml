@@ -18,12 +18,12 @@ services:
     depends_on:
       - service-discovery
       - customer-service
-      - logistics-simulator
+      - logistics-simulator 
       - orders-database
       - kafka
   
   customer-service:
-    image: gitlab-registry.ozon.dev/cs/classroom-5/teachers/five/customer-service:week-3
+    image: gitlab-registry.ozon.dev/cs/classroom-5/teachers/five/customer-service:latest
     restart: unless-stopped
     environment:
       "ROUTE256_ConnectionStrings:SdUrl": "http://service-discovery"
@@ -36,6 +36,9 @@ services:
   logistics-simulator:
     image: gitlab-registry.ozon.dev/cs/classroom-5/teachers/five/logistics-simulator:latest
     restart: unless-stopped
+    environment:
+      "ROUTE256_Redis:ConnectionString": "redis:6379,abortConnect=false"
+      "ROUTE256_Kafka:BootstrapServers": "kafka:29092"
     ports:
       - "8901:5080"
     depends_on:
@@ -96,6 +99,9 @@ services:
       KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
     depends_on:
       - zookeeper
+      
+  redis:
+    image: redis:7
         
   jaeger:
     restart: unless-stopped
