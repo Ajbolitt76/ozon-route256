@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Runtime.ExceptionServices;
 using Grpc.Core;
 using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
 using Ozon.Route256.Five.OrderService.Exceptions.Grpc;
@@ -89,28 +90,13 @@ public record struct TaskErrorWrapperAwaiter : ICriticalNotifyCompletion, INotif
         if (exception is DomainException dex)
             return dex;
         if (exception is RpcException rpcException)
-            return rpcException.ToDomain() ?? throw rpcException;
+        {
+            var domain = rpcException.ToDomain();
+            if(domain is null)
+                ExceptionDispatchInfo.Throw(rpcException);
+            return domain;
+        }
 
         throw exception;
     }
-}
-
-public class TaskExceptionWrapper<TValue> : GenericTaskExceptionWrapper<Task<TValue>, TValue>
-{
-    public TaskExceptionWrapper(Task<TValue> call) : base(call)
-    {
-    }
-
-    public override TaskErrorWrapperAwaiter<TValue> GetAwaiter()
-        => new(InnerAwaitable);
-}
-
-public class TaskExceptionWrapper : GenericTaskExceptionWrapper<Task>
-{
-    public TaskExceptionWrapper(Task call) : base(call)
-    {
-    }
-
-    public override TaskErrorWrapperAwaiter GetAwaiter()
-        => new(InnerAwaitable);
 }

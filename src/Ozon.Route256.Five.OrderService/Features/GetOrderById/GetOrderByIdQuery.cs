@@ -4,4 +4,4 @@ using Ozon.Route256.Five.OrderService.Cqrs;
 
 namespace Ozon.Route256.Five.OrderService.Features.GetOrderById;
 
-public record GetOrderByIdQuery(int Id) : GetOrderByIdRequest(Id), IQuery<GetOrderByIdResponse>;
+public record GetOrderByIdQuery(long Id) : GetOrderByIdRequest(Id), IQuery<GetOrderByIdResponse>;

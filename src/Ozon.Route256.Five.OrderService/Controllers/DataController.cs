@@ -13,12 +13,10 @@ namespace Ozon.Route256.Five.OrderService.Controllers;
 public class DataController : ControllerBase
 {
     private readonly IQueryDispatcher _queryDispatcher;
-    private readonly ICommandDispatcher _commandDispatcher;
 
-    public DataController(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher)
+    public DataController(IQueryDispatcher queryDispatcher)
     {
         _queryDispatcher = queryDispatcher;
-        _commandDispatcher = commandDispatcher;
     }
 
     /// <summary>

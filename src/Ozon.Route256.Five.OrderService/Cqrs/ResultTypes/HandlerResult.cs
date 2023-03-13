@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices.JavaScript;
 using Ozon.Route256.Five.OrderService.Exceptions;
 
 namespace Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;

@@ -31,10 +31,10 @@ public class OrdersController : ControllerBase
     /// Ручка получения статуса заказов
     /// </summary>
     /// <param name="id">Id заказа</param>
-    [HttpGet("{id:int}/Status")]
+    [HttpGet("{id:long}/Status")]
     [ProducesResponseType(typeof(GetStatusResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorDescription), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetStatus(int id, CancellationToken token)
+    public async Task<IActionResult> GetStatus(long id, CancellationToken token)
         => (await _queryDispatcher.Dispatch<GetOrderStatusQuery, GetStatusResponse>(new(id), token))
             .ToActionResult();
 
@@ -46,7 +46,7 @@ public class OrdersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorDescription), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorDescription), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> CancelOrder(int id, CancellationToken token)
+    public async Task<IActionResult> CancelOrder(long id, CancellationToken token)
         => (await _commandDispatcher.Dispatch<CancelOrderCommand>(new(id), token))
             .ToActionResult();
 

@@ -6,7 +6,7 @@ using Ozon.Route256.Five.OrderService.UnitTests.Grpc;
 
 namespace Ozon.Route256.Five.OrderService.UnitTests.CommonMocks;
 
-public static class CustomerServiceMock
+public static class CustomerServiceMockHelper
 {
     public static Mock<Customers.CustomersClient> WithGetCustomersData(IEnumerable<Customer> customers)
     {

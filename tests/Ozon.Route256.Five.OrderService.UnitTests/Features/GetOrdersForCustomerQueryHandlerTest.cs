@@ -34,7 +34,7 @@ public class GetOrdersForCustomerQueryHandlerTest
             Customer = new(customer.Id, customer.DefaultAddress.ToModel())
         };
 
-        var customersMock = CustomerServiceMock.WithGetCustomerData(customer);
+        var customersMock = CustomerServiceMockHelper.WithGetCustomerData(customer);
         var orderRepositoryMock = new Mock<IOrderRepository>();
         orderRepositoryMock.Setup(
                 x => x.GetAllForCustomer(

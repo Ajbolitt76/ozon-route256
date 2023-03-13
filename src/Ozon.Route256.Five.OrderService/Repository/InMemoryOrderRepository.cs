@@ -37,7 +37,7 @@ public class InMemoryOrderRepository : IOrderRepository
             .WaitAsync(cancellationToken);
     }
 
-    public Task<OrderAggregate?> GetOrderById(int id, CancellationToken cancellationToken)
+    public Task<OrderAggregate?> GetOrderById(long id, CancellationToken cancellationToken)
         => Task.FromResult(_inMemoryStore.Orders.GetValueOrDefault(id)).WaitAsync(cancellationToken);
 
     public Task<IReadOnlyList<OrderAggregate>> GetAllForCustomer(
@@ -46,34 +46,42 @@ public class InMemoryOrderRepository : IOrderRepository
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken)
-        => Task.FromResult(
-            (IReadOnlyList<OrderAggregate>)_inMemoryStore.Orders
-                .Select(x => x.Value)
-                .Where(
-                    x =>
-                        x.Customer.Id == customerId
-                        && (startFrom == null || x.OrderedAt > startFrom.Value))
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToList()).WaitAsync(cancellationToken);
+    {
+        var result = _inMemoryStore.Orders
+            .Select(x => x.Value)
+            .Where(
+                x =>
+                    x.Customer.Id == customerId
+                    && (startFrom == null || x.OrderedAt > startFrom.Value))
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+        
+        return Task.FromResult((IReadOnlyList<OrderAggregate>)result)
+            .WaitAsync(cancellationToken);
+    }
 
     public Task<IReadOnlyList<GetForRegionsResponseItem>> GetForRegions(
         IReadOnlyList<string> regions,
         DateTime startFrom,
         CancellationToken cancellationToken)
-        => Task.FromResult(
-            (IReadOnlyList<GetForRegionsResponseItem>)_inMemoryStore.Orders
-                .Select(x => x.Value)
-                .Where(x => x.OrderedAt > startFrom && regions.Contains(x.Customer.Address.Region))
-                .GroupBy(x => x.Customer.Address.Region, x => x)
-                .Select(
-                    x => new GetForRegionsResponseItem(
-                        x.Key,
-                        x.Count(),
-                        x.DistinctBy(y => y.Customer.Id).Count(),
-                        x.Sum(y => y.TotalPrice),
-                        x.Sum(y => y.TotalWeight)))
-                .ToList()).WaitAsync(cancellationToken);
+    {
+        var result = _inMemoryStore.Orders
+            .Select(x => x.Value)
+            .Where(x => x.OrderedAt > startFrom && regions.Contains(x.Customer.Address.Region))
+            .GroupBy(x => x.Customer.Address.Region, x => x)
+            .Select(
+                x => new GetForRegionsResponseItem(
+                    x.Key,
+                    x.Count(),
+                    x.DistinctBy(y => y.Customer.Id).Count(),
+                    x.Sum(y => y.TotalPrice),
+                    x.Sum(y => y.TotalWeight)))
+            .ToList();
+        
+        return Task.FromResult((IReadOnlyList<GetForRegionsResponseItem>)result)
+            .WaitAsync(cancellationToken);
+    }
 
     public Task Upsert(OrderAggregate value, CancellationToken cancellationToken)
     {

@@ -12,8 +12,8 @@ public static class ExceptionHelper
     public static RpcException ToRpcException(this DomainException exception)
         => exception switch
         {
-            NotFoundException ex => new RpcException(new Status(StatusCode.NotFound, ex.Message)),
-            _ => new RpcException(new Status(StatusCode.FailedPrecondition, exception.Message))
+            NotFoundException ex => new RpcException(new Status(StatusCode.NotFound, ex.Message, ex)),
+            _ => new RpcException(new Status(StatusCode.FailedPrecondition, exception.Message, exception))
         };
     
     public static IActionResult ToActionResult(DomainException exception)

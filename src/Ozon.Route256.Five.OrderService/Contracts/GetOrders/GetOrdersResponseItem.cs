@@ -7,7 +7,7 @@ namespace Ozon.Route256.Five.OrderService.Contracts.GetOrders;
 /// Представление заказа
 /// </summary>
 public record GetOrdersResponseItem(
-    int Id,
+    long Id,
     int ItemsCount,
     decimal TotalPrice,
     double TotalWeight,

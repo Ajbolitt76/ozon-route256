@@ -28,7 +28,7 @@ public class OrdersGrpcService : Orders.OrdersBase
             context.CancellationToken);
 
         if (!result.Success)
-            result.Error.ToRpcException();
+            throw result.Error.ToRpcException();
 
         var response = result.Value!;
 

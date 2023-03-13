@@ -17,14 +17,13 @@ public class InMemoryStore
     public InMemoryStore(Customers.CustomersClient customersClient)
     {
         _customersClient = customersClient;
-        FillData().Wait();
     }
 
-    public virtual IReadOnlyList<string> Regions => _regionsList;
+    public IReadOnlyList<string> Regions => _regionsList;
     
-    public virtual ConcurrentDictionary<long, OrderAggregate> Orders => _orders;
+    public ConcurrentDictionary<long, OrderAggregate> Orders => _orders;
 
-    private async Task FillData()
+    public async Task FillData()
     {
         var customers = (await _customersClient.GetCustomersAsync(new Empty()))
             .Customers

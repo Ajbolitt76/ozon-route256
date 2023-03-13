@@ -1,4 +1,5 @@
 using System.Runtime.Intrinsics.X86;
+using Ozon.Route256.Five.OrderService.Features.GetAllCustomers;
 
 namespace Ozon.Route256.Five.OrderService.Cqrs;
 
@@ -8,11 +9,12 @@ public static class CqrsServiceCollectionExtensions
     {
         serviceCollection.AddScoped<ICommandDispatcher, CommandDispatcher>();
         serviceCollection.AddScoped<IQueryDispatcher, QueryDispatcher>();
-
+        serviceCollection.AddCqrsHandlers(typeof(GetAllCustomerQueryHandler));
+        
         return serviceCollection;
     }
 
-    public static IServiceCollection AddCqrsHandlers(this IServiceCollection serviceCollection, params Type[] types)
+    private static IServiceCollection AddCqrsHandlers(this IServiceCollection serviceCollection, params Type[] types)
     {
         var allowedTypes = new[]
         {

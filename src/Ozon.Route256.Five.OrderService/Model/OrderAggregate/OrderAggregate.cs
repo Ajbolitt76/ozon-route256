@@ -1,7 +1,7 @@
 namespace Ozon.Route256.Five.OrderService.Model.OrderAggregate;
 
 public record OrderAggregate(
-    int Id,
+    long Id,
     OrderState OrderState,
     CustomerDto Customer,
     List<OrderGood> Goods,

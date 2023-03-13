@@ -45,7 +45,7 @@ public class GetAllOrdersQueryHandlerTest
             Customer = new(customer.Id, customer.DefaultAddress.ToModel())
         };
 
-        var customersMock = CustomerServiceMock.WithGetCustomersData(new[] { customer });
+        var customersMock = CustomerServiceMockHelper.WithGetCustomersData(new[] { customer });
         var orderRepositoryMock = new Mock<IOrderRepository>();
         orderRepositoryMock.Setup(
                 x => x.GetAllByRegions(
@@ -95,7 +95,7 @@ public class GetAllOrdersQueryHandlerTest
     {
         var customer = FakeDataGenerators.CustomerServiceCustomerDtos.First();
         
-        var customersMock = CustomerServiceMock.WithGetCustomersData(new[] { customer });
+        var customersMock = CustomerServiceMockHelper.WithGetCustomersData(new[] { customer });
         var orderRepositoryMock = new Mock<IOrderRepository>();
 
         var handler = new GetAllOrdersQueryHandler(

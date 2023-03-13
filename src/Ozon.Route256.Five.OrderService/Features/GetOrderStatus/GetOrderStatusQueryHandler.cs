@@ -21,7 +21,7 @@ public class GetOrderStatusQueryHandler : IQueryHandler<GetOrderStatusQuery, Get
         var order = await _orderRepository.GetOrderById(request.Id, token);
 
         if (order is null)
-            return HandlerResult<GetStatusResponse>.FromError(NotFoundException.WithStandardMessage(nameof(Order)));
+            return HandlerResult<GetStatusResponse>.FromError(NotFoundException.WithStandardMessage<Order>());
 
         return new GetStatusResponse(order.Id, order.OrderState);
     }

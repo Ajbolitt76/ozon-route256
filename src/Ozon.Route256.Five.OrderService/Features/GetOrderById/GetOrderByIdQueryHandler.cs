@@ -25,7 +25,7 @@ public class GetOrderByIdQueryHandler : IQueryHandler<GetOrderByIdQuery, GetOrde
         var order = await _orderRepository.GetOrderById(request.Id, token);
 
         if (order is null)
-            return NotFoundException.WithStandardMessage(nameof(Order));
+            return NotFoundException.WithStandardMessage<Order>();
         
         var customer = await _customersClient.GetCustomerAsync(new()
         {

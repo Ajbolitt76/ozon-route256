@@ -18,7 +18,7 @@ public class GetAllCustomersQueryHandlerTest
     {
         var customers = FakeDataGenerators.CustomerServiceCustomerDtos.Take(10).ToList();
 
-        var customersMock = CustomerServiceMock.WithGetCustomersData(customers);
+        var customersMock = CustomerServiceMockHelper.WithGetCustomersData(customers);
 
         var handler = new GetAllCustomerQueryHandler(customersMock.Object);
         var result = await handler.Handle(new GetAllCustomerQuery(), default);

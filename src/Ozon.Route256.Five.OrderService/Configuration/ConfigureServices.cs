@@ -14,8 +14,6 @@ public static class ConfigureServices
         
         sc.AddHostedService<SdConsumerHostedService>();
 
-        sc.AddCqrsHandlers(typeof(GetAllCustomerQueryHandler));
-        
         sc.AddSingleton<InMemoryStore>();
         sc.AddScoped<IRegionRepository, InMemoryRegionRepository>();
         sc.AddScoped<IOrderRepository, InMemoryOrderRepository>();

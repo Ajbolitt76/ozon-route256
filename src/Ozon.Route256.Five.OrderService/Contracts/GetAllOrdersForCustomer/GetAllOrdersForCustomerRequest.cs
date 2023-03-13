@@ -13,7 +13,7 @@ public record GetAllOrdersForCustomerRequest(
     int PageNumber,
     int PageSize)
 {
-    public int PageNumber { get; } = PageNumber > 0 ? PageNumber : PaginationDefaults.PageNumber;
+    public int PageNumber { get; } = PaginationDefaults.NormalizePageNumber(PageNumber);
 
-    public int PageSize { get; } = PageSize > 0 ? PageSize : PaginationDefaults.PageSize;
+    public int PageSize { get; } = PaginationDefaults.NormalizePageSize(PageSize);
 };

@@ -12,7 +12,7 @@ public interface IOrderRepository
         int pageSize,
         CancellationToken cancellationToken);
 
-    Task<OrderAggregate?> GetOrderById(int id, CancellationToken cancellationToken);
+    Task<OrderAggregate?> GetOrderById(long id, CancellationToken cancellationToken);
     
     Task<IReadOnlyList<OrderAggregate>> GetAllForCustomer(
         int customerId,

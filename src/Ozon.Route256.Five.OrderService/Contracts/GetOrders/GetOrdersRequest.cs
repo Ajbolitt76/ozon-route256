@@ -9,7 +9,7 @@ namespace Ozon.Route256.Five.OrderService.Contracts.GetOrders;
 /// <param name="PageSize">Размер страницы</param>
 public record GetOrdersRequest(IReadOnlyList<string>? Regions, bool? IsAscending, int PageNumber, int PageSize)
 {
-    public int PageNumber { get; } = PaginationDefaults.CheckPageNumber(PageNumber);
+    public int PageNumber { get; } = PaginationDefaults.NormalizePageNumber(PageNumber);
 
-    public int PageSize { get; } = PaginationDefaults.CheckPageSize(PageSize);
+    public int PageSize { get; } = PaginationDefaults.NormalizePageSize(PageSize);
 }

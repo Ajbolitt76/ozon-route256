@@ -3,7 +3,7 @@ using Ozon.Route256.Five.OrderService.Model;
 namespace Ozon.Route256.Five.OrderService.Contracts.GetOrderById;
 
 public record GetOrderByIdResponse(
-    int Id,
+    long Id,
     int ItemsCount,
     decimal TotalPrice,
     double TotalWeight,

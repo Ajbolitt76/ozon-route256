@@ -6,7 +6,7 @@ public static class PaginationDefaults
     
     public const int PageSize = 10;
 
-    public static int CheckPageNumber(int value) => value > 0 ? value : PageNumber;
+    public static int NormalizePageNumber(int value) => value > 0 ? value : PageNumber;
     
-    public static int CheckPageSize(int value) => value > 0 ? value : PageSize;
+    public static int NormalizePageSize(int value) => value > 0 ? value : PageSize;
 }
