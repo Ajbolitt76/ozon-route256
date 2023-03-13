@@ -28,7 +28,7 @@ public class GetOrderStatusQueryHandlerTest
         var orderRepositoryMock = new Mock<IOrderRepository>();
         orderRepositoryMock.Setup(
                 x => x.GetOrderById(
-                    It.IsAny<int>(),
+                    It.IsAny<long>(),
                     It.IsAny<CancellationToken>()))
             .ReturnsAsync(orderData);
 

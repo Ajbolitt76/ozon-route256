@@ -61,7 +61,7 @@ public class SdConsumerHostedService : BackgroundService
                     exc,
                     "Не удалось связаться с SD. Повторная попытка переподключения через {RetryTime} мс",
                     _retryDelayMs.TotalMilliseconds);
-                await Task.Delay(_retryDelayMs);
+                await Task.Delay(_retryDelayMs, stoppingToken);
             }
         }
     }

@@ -41,8 +41,8 @@ public class CancelOrderCommandHandlerTest
                     }));
 
         var orderRepositoryMock = new Mock<IOrderRepository>();
-        orderRepositoryMock.Setup(x => x.GetOrderById(It.IsAny<int>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((int id, CancellationToken _) => FakeDataGenerators.ModelOrderAggregates.First() with { Id = id });
+        orderRepositoryMock.Setup(x => x.GetOrderById(It.IsAny<long>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((long id, CancellationToken _) => FakeDataGenerators.ModelOrderAggregates.First() with { Id = id });
 
         var handler = new CancelOrderCommandHandler(logisticsMock.Object, orderRepositoryMock.Object);
         

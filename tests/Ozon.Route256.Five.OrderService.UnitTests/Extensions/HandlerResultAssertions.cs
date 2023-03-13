@@ -61,7 +61,7 @@ public class HandlerResultAssertions<T>
         Execute.Assertion
             .BecauseOf(because, becauseArgs)
             .ForCondition(_result.Success)
-            .FailWith("Expected success result, but got failure. {0}", _result);
+            .FailWith("Expected success result, but got failure. {0}. Stacktrace: {1}", _result, _result.Error?.StackTrace);
 
         return this;
     }

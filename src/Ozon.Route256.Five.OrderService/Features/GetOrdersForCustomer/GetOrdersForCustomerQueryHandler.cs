@@ -27,7 +27,7 @@ public class GetOrdersForCustomerQueryHandler
             new GetCustomerByIdRequest()
             {
                 Id = request.ClientId
-            }).ToHandlerResult();
+            }, cancellationToken: token).ToHandlerResult();
 
         if (!clientInfoResult.Success)
             return HandlerResult<GetAllOrdersForCustomerResponse>.FromError(clientInfoResult.Error);

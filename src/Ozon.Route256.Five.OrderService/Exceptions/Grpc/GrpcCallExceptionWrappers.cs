@@ -16,18 +16,6 @@ public abstract class GenericTaskExceptionWrapper<TAwaitable, TValue>
     public abstract TaskErrorWrapperAwaiter<TValue> GetAwaiter();
 }
 
-public abstract class GenericTaskExceptionWrapper<TAwaitable>
-{
-    public GenericTaskExceptionWrapper(TAwaitable call)
-    {
-        InnerAwaitable = call;
-    }
-
-    public TAwaitable InnerAwaitable { get; }
-
-    public abstract TaskErrorWrapperAwaiter GetAwaiter();
-}
-
 public class AsyncUnaryCallExceptionWrapper<TValue> : GenericTaskExceptionWrapper<AsyncUnaryCall<TValue>, TValue>
 {
     public AsyncUnaryCallExceptionWrapper(AsyncUnaryCall<TValue> call) : base(call)

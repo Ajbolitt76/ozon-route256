@@ -12,11 +12,3 @@ public interface IRequestHandler<in TRequest> where TRequest : IRequest
 {
     Task<HandlerResult> Handle(TRequest request, CancellationToken token);
 }
-
-public interface IRequestHandler : IRequestHandler<Unit>
-{
-    Task<HandlerResult> IRequestHandler<Unit>.Handle(Unit request, CancellationToken token) => Handle(token);
-    Task<HandlerResult> Handle(CancellationToken token);
-}
-
-public record struct Unit : IRequest;

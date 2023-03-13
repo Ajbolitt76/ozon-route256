@@ -22,7 +22,6 @@ public static class CqrsServiceCollectionExtensions
             typeof(ICommandHandler<>),
             typeof(IQueryHandler<,>),
             typeof(IRequestHandler<,>),
-            typeof(IRequestHandler)
         };
 
         serviceCollection.Scan(

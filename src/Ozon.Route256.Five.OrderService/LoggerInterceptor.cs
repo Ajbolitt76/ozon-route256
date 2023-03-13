@@ -17,7 +17,7 @@ public class LoggerInterceptor: Interceptor
         ClientInterceptorContext<TRequest, TResponse> context,
         AsyncUnaryCallContinuation<TRequest, TResponse> continuation)
     {
-        _logger.LogInformation(request.ToString());
+        _logger.LogInformation("Отправлено сообщение в GRPC: {0}", request);
 
         return base.AsyncUnaryCall(request, context, continuation);
     }
@@ -27,7 +27,7 @@ public class LoggerInterceptor: Interceptor
         ClientInterceptorContext<TRequest, TResponse> context,
         BlockingUnaryCallContinuation<TRequest, TResponse> continuation)
     {
-        _logger.LogInformation(request.ToString());
+        _logger.LogInformation("Отправлено сообщение в GRPC: {0}", request);
 
         return base.BlockingUnaryCall(request, context, continuation);
     }
@@ -37,7 +37,7 @@ public class LoggerInterceptor: Interceptor
         ServerCallContext context,
         UnaryServerMethod<TRequest, TResponse> continuation)
     {
-        _logger.LogInformation(request.ToString());
+        _logger.LogInformation("Отправлено сообщение в GRPC: {0}", request);
         return base.UnaryServerHandler(request, context, continuation);
     }
 
