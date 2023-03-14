@@ -4,4 +4,4 @@ namespace Ozon.Route256.Five.OrderService.Contracts.GetAllCustomers;
 /// Результат запроса на список клиентов
 /// </summary>
 /// <param name="Customers">Список клиентов</param>
-public record GetAllCustomersResponse(List<GetAllCustomersResponseItem> Customers);
+public record GetAllCustomersResponse(IReadOnlyCollection<GetAllCustomersResponseItem> Customers);

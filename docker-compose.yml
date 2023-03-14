@@ -9,18 +9,24 @@ services:
     restart: unless-stopped 
     ports:
       - "8904-8910:80"
+    environment:
+      "ConnectionStrings:SdServiceClientUrl": "http://service-discovery"
+      "ConnectionStrings:LogisticsSimulatorServiceClientUrl": "http://logistics-simulator"
+      "ConnectionStrings:CustomersClientUrl": "http://customer-service"
     deploy:
       replicas: 2
     depends_on:
       - service-discovery
       - customer-service
-      - logistics-simulator
+      - logistics-simulator 
       - orders-database
       - kafka
   
   customer-service:
     image: gitlab-registry.ozon.dev/cs/classroom-5/teachers/five/customer-service:latest
     restart: unless-stopped
+    environment:
+      "ROUTE256_ConnectionStrings:SdUrl": "http://service-discovery"
     ports:
       - "8900:80"
     depends_on:
@@ -30,8 +36,11 @@ services:
   logistics-simulator:
     image: gitlab-registry.ozon.dev/cs/classroom-5/teachers/five/logistics-simulator:latest
     restart: unless-stopped
+    environment:
+      "ROUTE256_Redis:ConnectionString": "redis:6379,abortConnect=false"
+      "ROUTE256_Kafka:BootstrapServers": "kafka:29092"
     ports:
-      - "8901:80"
+      - "8901:5080"
     depends_on:
       - kafka
     
@@ -84,12 +93,19 @@ services:
     image: 'bitnami/kafka:latest'
     restart: unless-stopped
     ports:
-      - "9092:9092"
+      - "9093:9093"
     environment:
       ALLOW_PLAINTEXT_LISTENER: "yes"
       KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "EXTERNAL:PLAINTEXT,CLIENT:PLAINTEXT"
+      KAFKA_LISTENERS: "CLIENT://:9092,EXTERNAL://:9093"
+      KAFKA_ADVERTISED_LISTENERS: "CLIENT://kafka:9092,EXTERNAL://localhost:9093"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "CLIENT"
     depends_on:
       - zookeeper
+      
+  redis:
+    image: redis:7
         
   jaeger:
     restart: unless-stopped

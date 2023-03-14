@@ -6,6 +6,7 @@ using Ozon.Route256.Five.OrderService.DbClientBalancer;
 using Ozon.Route256.Five.OrderService.Mappings;
 using Ozon.Route256.Five.OrderService.UnitTests.CommonMocks;
 using Ozon.Route256.Five.OrderService.UnitTests.Grpc;
+using Ozon.Route256.Five.Sd.Grpc;
 using Xunit.Abstractions;
 
 namespace Ozon.Route256.Five.OrderService.UnitTests.DbClientBalancer;
@@ -19,7 +20,7 @@ public class SdConsumerHostedServiceTest
     {
         _testOutputHelper = testOutputHelper;
     }
-
+    
     /// <summary>
     /// Сообщения из открытого потока, должны обрабатывться и сохранятся в DbStore
     /// </summary>
@@ -27,7 +28,6 @@ public class SdConsumerHostedServiceTest
     public async Task Handle_IncomingStream_ShouldModifyDbStore()
     {
         var serverStreamMock = new GrpcServerStreamPublisher<DbResourcesResponse>();
-
         var clientMock = new Mock<SdService.SdServiceClient>(MockBehavior.Strict);
         clientMock.Setup(
                 x => x.DbResources(

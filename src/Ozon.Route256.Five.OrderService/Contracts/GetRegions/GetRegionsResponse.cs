@@ -4,4 +4,4 @@ namespace Ozon.Route256.Five.OrderService.Contracts.GetRegions;
 /// Получение списка регионов
 /// </summary>
 /// <param name="Regions">Регионы</param>
-public record GetRegionsResponse(List<string> Regions);
+public record GetRegionsResponse(IReadOnlyList<string> Regions);

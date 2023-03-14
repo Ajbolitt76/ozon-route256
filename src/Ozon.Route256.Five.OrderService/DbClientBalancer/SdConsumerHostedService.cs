@@ -1,5 +1,6 @@
 using Grpc.Core;
 using Ozon.Route256.Five.OrderService.Mappings;
+using Ozon.Route256.Five.Sd.Grpc;
 
 namespace Ozon.Route256.Five.OrderService.DbClientBalancer;
 
@@ -53,13 +54,15 @@ public class SdConsumerHostedService : BackgroundService
             }
             catch (RpcException exc)
             {
+                if (exc.StatusCode == StatusCode.Cancelled)
+                    return;
+
                 _logger.LogError(
                     exc,
                     "Не удалось связаться с SD. Повторная попытка переподключения через {RetryTime} мс",
                     _retryDelayMs.TotalMilliseconds);
+                await Task.Delay(_retryDelayMs, stoppingToken);
             }
-
-            await Task.Delay(_retryDelayMs);
         }
     }
 }

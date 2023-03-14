@@ -6,4 +6,4 @@ namespace Ozon.Route256.Five.OrderService.Contracts.GetStatus;
 /// Резултат запроса на статус заказа
 /// </summary>
 /// <param name="OrderState">Статус заказа</param>
-public record GetStatusResponse(OrderState OrderState);
+public record GetStatusResponse(long Id, OrderState OrderState);

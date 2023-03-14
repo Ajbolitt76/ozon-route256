@@ -1,11 +1,8 @@
-using Grpc.Net.ClientFactory;
-using Ozon.Route256.Five;
 using Ozon.Route256.Five.OrderService;
 using Ozon.Route256.Five.OrderService.Configuration;
-using Ozon.Route256.Five.OrderService.DbClientBalancer;
+using Ozon.Route256.Five.OrderService.Cqrs;
 using Ozon.Route256.Five.OrderService.GrpcServices;
-using InterceptorRegistration = Grpc.Net.ClientFactory.InterceptorRegistration;
-
+using Ozon.Route256.Five.OrderService.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,24 +10,11 @@ builder.WebHost.ConfigureKestrel(x => x.Configure(builder.Configuration));
 
 builder.Services.AddGrpc(options => { options.Interceptors.Add<LoggerInterceptor>(); });
 builder.Services.AddGrpcReflection();
-builder.Services.AddGrpcClient<SdService.SdServiceClient>(
-    options =>
-    {
-        options.Address = new Uri("http://localhost:8903");
-        options.InterceptorRegistrations.Add(
-            new InterceptorRegistration(
-                InterceptorScope.Client,
-                sp =>
-                {
-                    var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
+builder.Services.AddGrpcClients(builder.Configuration);
 
-                    return new LoggerInterceptor(loggerFactory.CreateLogger<LoggerInterceptor>());
-                }));
-    });
+builder.Services.AddCqrs();
+builder.Services.AddCoreServices();
 
-
-builder.Services.AddSingleton<IDbStore, DbStore>();
-builder.Services.AddHostedService<SdConsumerHostedService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddCustomSwagger();
@@ -39,7 +23,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
+    app.UseSwagger(); 
     app.UseSwaggerUI();
     app.MapGrpcReflectionService();
 }
@@ -47,4 +31,21 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 app.MapGrpcService<OrdersGrpcService>();
 
+_ = DoWarmup(app.Lifetime.ApplicationStopping);
+
 app.Run();
+
+async Task DoWarmup(CancellationToken cancellationToken)
+{
+    try
+    {
+        app.Logger.LogInformation("Начинаем инициализацю inmemory хранилища...");
+        var store = app.Services.GetRequiredService<InMemoryStore>();
+        await store.FillData(cancellationToken);
+        app.Logger.LogInformation("Инициализаця inmemory хранилища законченна...");
+    }
+    catch (Exception e)
+    {
+        app.Logger.LogCritical(e, "Невозможно инициализировать данные для сервиса...");
+    }
+}
