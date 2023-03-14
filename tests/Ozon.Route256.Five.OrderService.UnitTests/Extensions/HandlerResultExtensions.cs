@@ -1,4 +1,3 @@
-using FluentAssertions;
 using FluentAssertions.Primitives;
 using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
 

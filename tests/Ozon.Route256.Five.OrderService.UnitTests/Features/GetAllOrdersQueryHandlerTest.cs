@@ -1,19 +1,14 @@
 using Bogus;
 using FluentAssertions;
-using Google.Protobuf.WellKnownTypes;
-using Grpc.Core;
 using Moq;
-using Ozon.Route256.Five.CustomersService.Grpc;
 using Ozon.Route256.Five.OrderService.Contracts.GetOrders;
 using Ozon.Route256.Five.OrderService.Exceptions;
 using Ozon.Route256.Five.OrderService.Features.GetAllOrders;
 using Ozon.Route256.Five.OrderService.Mappings;
 using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
-using Ozon.Route256.Five.OrderService.Repository;
 using Ozon.Route256.Five.OrderService.Repository.Abstractions;
 using Ozon.Route256.Five.OrderService.UnitTests.CommonMocks;
 using Ozon.Route256.Five.OrderService.UnitTests.Extensions;
-using Ozon.Route256.Five.OrderService.UnitTests.Grpc;
 
 namespace Ozon.Route256.Five.OrderService.UnitTests.Features;
 

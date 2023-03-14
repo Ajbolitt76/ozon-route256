@@ -15,13 +15,13 @@ public class GetOrderStatusQueryHandler : IQueryHandler<GetOrderStatusQuery, Get
     {
         _orderRepository = orderRepository;
     }
-    
+
     public async Task<HandlerResult<GetStatusResponse>> Handle(GetOrderStatusQuery request, CancellationToken token)
     {
         var order = await _orderRepository.GetOrderById(request.Id, token);
 
         if (order is null)
-            return HandlerResult<GetStatusResponse>.FromError(NotFoundException.WithStandardMessage<Order>());
+            return HandlerResult<GetStatusResponse>.FromError(NotFoundException.WithStandardMessage<Order>(request.Id));
 
         return new GetStatusResponse(order.Id, order.OrderState);
     }

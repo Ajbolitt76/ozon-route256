@@ -1,12 +1,8 @@
 using Bogus;
 using FluentAssertions;
 using Moq;
-using Ozon.Route256.Five.OrderService.Contracts.GetOrders;
 using Ozon.Route256.Five.OrderService.Contracts.GetStatus;
-using Ozon.Route256.Five.OrderService.Features.GetAllOrders;
 using Ozon.Route256.Five.OrderService.Features.GetOrderStatus;
-using Ozon.Route256.Five.OrderService.Mappings;
-using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
 using Ozon.Route256.Five.OrderService.Repository.Abstractions;
 using Ozon.Route256.Five.OrderService.UnitTests.CommonMocks;
 using Ozon.Route256.Five.OrderService.UnitTests.Extensions;

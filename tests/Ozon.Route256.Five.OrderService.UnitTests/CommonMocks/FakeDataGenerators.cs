@@ -1,6 +1,4 @@
 using Bogus;
-using Google.Protobuf.Collections;
-using Ozon.Route256.Five.CustomersService.Grpc;
 using Ozon.Route256.Five.OrderService.Model;
 using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
 

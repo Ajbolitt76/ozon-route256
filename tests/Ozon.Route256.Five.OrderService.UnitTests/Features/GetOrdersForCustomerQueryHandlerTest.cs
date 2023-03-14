@@ -1,12 +1,10 @@
 using Bogus;
 using FluentAssertions;
-using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Moq;
 using Ozon.Route256.Five.CustomersService.Grpc;
 using Ozon.Route256.Five.OrderService.Contracts.GetAllOrdersForCustomer;
 using Ozon.Route256.Five.OrderService.Exceptions;
-using Ozon.Route256.Five.OrderService.Features.GetOrderById;
 using Ozon.Route256.Five.OrderService.Features.GetOrdersForCustomer;
 using Ozon.Route256.Five.OrderService.Mappings;
 using Ozon.Route256.Five.OrderService.Model.OrderAggregate;

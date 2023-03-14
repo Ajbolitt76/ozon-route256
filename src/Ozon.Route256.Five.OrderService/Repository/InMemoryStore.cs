@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using Bogus;
 using Google.Protobuf.WellKnownTypes;
 using Ozon.Route256.Five.CustomersService.Grpc;
+using Ozon.Route256.Five.OrderService.Exceptions;
 using Ozon.Route256.Five.OrderService.Mappings;
 using Ozon.Route256.Five.OrderService.Model;
 using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
@@ -14,18 +15,26 @@ public class InMemoryStore
     private readonly IReadOnlyList<string> _regionsList = new[] { "Moscow", "StPetersburg", "Novosibirsk" };
     private readonly ConcurrentDictionary<long, OrderAggregate> _orders = new(2, 10);
 
+    private bool _isFilled;
+
     public InMemoryStore(Customers.CustomersClient customersClient)
     {
         _customersClient = customersClient;
     }
 
-    public IReadOnlyList<string> Regions => _regionsList;
-    
-    public ConcurrentDictionary<long, OrderAggregate> Orders => _orders;
+    public IReadOnlyList<string> Regions => _isFilled
+        ? _regionsList
+        : throw new NotReadyException();
 
-    public async Task FillData()
+    public ConcurrentDictionary<long, OrderAggregate> Orders => _isFilled
+        ? _orders
+        : throw new NotReadyException();
+
+    public async Task FillData(CancellationToken cancellationToken)
     {
-        var customers = (await _customersClient.GetCustomersAsync(new Empty()))
+        var customers = (await _customersClient.GetCustomersAsync(
+                new Empty(), 
+                cancellationToken: cancellationToken))
             .Customers
             .Select(x => new CustomerDto(x.Id, x.DefaultAddress.ToModel()))
             .ToList();
@@ -53,5 +62,7 @@ public class InMemoryStore
 
         foreach (var generatedOrder in generatedOrders)
             _orders[generatedOrder.Id] = generatedOrder;
+
+        _isFilled = true;
     }
 }

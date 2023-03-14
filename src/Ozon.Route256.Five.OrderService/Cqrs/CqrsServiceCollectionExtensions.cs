@@ -1,4 +1,3 @@
-using System.Runtime.Intrinsics.X86;
 using Ozon.Route256.Five.OrderService.Features.GetAllCustomers;
 
 namespace Ozon.Route256.Five.OrderService.Cqrs;

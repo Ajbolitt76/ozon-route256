@@ -1,4 +1,3 @@
-using System.Runtime.ExceptionServices;
 using Ozon.Route256.Five.OrderService;
 using Ozon.Route256.Five.OrderService.Configuration;
 using Ozon.Route256.Five.OrderService.Cqrs;
@@ -32,17 +31,21 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 app.MapGrpcService<OrdersGrpcService>();
 
-try
-{
-    app.Logger.LogInformation("Начинаем инициализацю inmemory хранилища...");
-    var store = app.Services.GetRequiredService<InMemoryStore>();
-    await store.FillData();
-    app.Logger.LogInformation("Инициализаця inmemory хранилища законченна...");
-}
-catch (Exception e)
-{
-    app.Logger.LogCritical(e, "Невозможно инициализировать данные для сервиса...");
-    throw;
-}
+_ = DoWarmup(app.Lifetime.ApplicationStopping);
 
 app.Run();
+
+async Task DoWarmup(CancellationToken cancellationToken)
+{
+    try
+    {
+        app.Logger.LogInformation("Начинаем инициализацю inmemory хранилища...");
+        var store = app.Services.GetRequiredService<InMemoryStore>();
+        await store.FillData(cancellationToken);
+        app.Logger.LogInformation("Инициализаця inmemory хранилища законченна...");
+    }
+    catch (Exception e)
+    {
+        app.Logger.LogCritical(e, "Невозможно инициализировать данные для сервиса...");
+    }
+}

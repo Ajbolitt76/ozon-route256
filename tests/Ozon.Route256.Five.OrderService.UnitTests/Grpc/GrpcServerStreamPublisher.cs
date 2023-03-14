@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using System.Threading.Channels;
 using Grpc.Core;
 

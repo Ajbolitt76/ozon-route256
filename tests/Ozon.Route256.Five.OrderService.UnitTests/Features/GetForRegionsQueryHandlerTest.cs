@@ -1,13 +1,9 @@
 using FluentAssertions;
 using Moq;
 using Ozon.Route256.Five.OrderService.Contracts.GetForRegions;
-using Ozon.Route256.Five.OrderService.Contracts.GetOrders;
 using Ozon.Route256.Five.OrderService.Exceptions;
-using Ozon.Route256.Five.OrderService.Features.GetAllOrders;
 using Ozon.Route256.Five.OrderService.Features.GetForRegions;
-using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
 using Ozon.Route256.Five.OrderService.Repository.Abstractions;
-using Ozon.Route256.Five.OrderService.UnitTests.CommonMocks;
 using Ozon.Route256.Five.OrderService.UnitTests.Extensions;
 
 namespace Ozon.Route256.Five.OrderService.UnitTests.Features;

@@ -26,7 +26,7 @@ public class CancelOrderCommandHandler : ICommandHandler<CancelOrderCommand>
         var order = await _orderRepository.GetOrderById(request.Id, token);
 
         if (order is null)
-            return HandlerResult.FromError(NotFoundException.WithStandardMessage<Order>());
+            return HandlerResult.FromError(NotFoundException.WithStandardMessage<Order>(request.Id));
 
         var serviceResult = await _logisticsClient.OrderCancelAsync(
                 new() { Id = request.Id },

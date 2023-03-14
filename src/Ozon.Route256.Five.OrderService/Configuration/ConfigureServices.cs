@@ -1,6 +1,4 @@
-using Ozon.Route256.Five.OrderService.Cqrs;
 using Ozon.Route256.Five.OrderService.DbClientBalancer;
-using Ozon.Route256.Five.OrderService.Features.GetAllCustomers;
 using Ozon.Route256.Five.OrderService.Repository;
 using Ozon.Route256.Five.OrderService.Repository.Abstractions;
 

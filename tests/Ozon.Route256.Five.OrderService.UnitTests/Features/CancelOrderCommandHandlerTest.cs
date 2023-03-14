@@ -1,12 +1,8 @@
-using FluentAssertions;
 using Moq;
 using Grpc.Core;
 using Ozon.Route256.Five.LogisticsSimulator.Grpc;
-using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
 using Ozon.Route256.Five.OrderService.Exceptions;
 using Ozon.Route256.Five.OrderService.Features.CancelOrder;
-using Ozon.Route256.Five.OrderService.Model;
-using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
 using Ozon.Route256.Five.OrderService.Repository.Abstractions;
 using Ozon.Route256.Five.OrderService.UnitTests.CommonMocks;
 using Ozon.Route256.Five.OrderService.UnitTests.Extensions;

@@ -1,4 +1,3 @@
-using Ozon.Route256.Five.OrderService.Contracts.GetOrders;
 using Ozon.Route256.Five.OrderService.Contracts.GetStatus;
 using Ozon.Route256.Five.OrderService.Cqrs;
 

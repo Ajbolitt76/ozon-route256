@@ -6,6 +6,6 @@ public class NotFoundException : DomainException
     {
     }
 
-    public static NotFoundException WithStandardMessage<TEntity>()
-        => new($"Entity {typeof(TEntity).Name} not found");
+    public static NotFoundException WithStandardMessage<TEntity>(object id)
+        => new($"Entity {typeof(TEntity).Name} with {id} not found");
 }

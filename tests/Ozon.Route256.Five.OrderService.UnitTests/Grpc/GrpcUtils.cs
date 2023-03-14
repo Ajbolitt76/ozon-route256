@@ -1,5 +1,4 @@
 using Grpc.Core;
-using Moq;
 
 namespace Ozon.Route256.Five.OrderService.UnitTests.Grpc;
 
