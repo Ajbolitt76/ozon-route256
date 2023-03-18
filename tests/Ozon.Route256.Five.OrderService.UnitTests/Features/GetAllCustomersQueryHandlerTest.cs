@@ -7,7 +7,7 @@ using Ozon.Route256.Five.OrderService.UnitTests.Extensions;
 
 namespace Ozon.Route256.Five.OrderService.UnitTests.Features;
 
-public class GetAllCustomersQueryHandlerTest
+public class GetAllCustomersQueryHandlerTest : BaseUnitTest
 {
     /// <summary>
     /// Получение покупателей, проксирует на сервис покупателей
@@ -19,7 +19,7 @@ public class GetAllCustomersQueryHandlerTest
 
         var customersMock = CustomerServiceMockHelper.WithGetCustomersData(customers);
 
-        var handler = new GetAllCustomerQueryHandler(customersMock.Object);
+        var handler = new GetAllCustomerQueryHandler(customersMock.Object, PassthroughCache.Object);
         var result = await handler.Handle(new GetAllCustomerQuery(), default);
 
         result

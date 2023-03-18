@@ -1,4 +1,5 @@
 using Ozon.Route256.Five.OrderService.Model;
+using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
 
 namespace Ozon.Route256.Five.OrderService.Contracts.GetAllOrdersForCustomer;
 
@@ -10,7 +11,7 @@ public record GetAllOrdersForCustomerResponseItem(
     int ItemsCount,
     decimal TotalPrice,
     double TotalWeight,
-    string OrderType,
+    OrderType OrderType,
     DateTime OrderedAt,
     OrderState OrderState,
     string ClientName,

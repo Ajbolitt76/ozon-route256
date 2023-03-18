@@ -1,7 +1,7 @@
 using Ozon.Route256.Five.OrderService.Contracts.GetRegions;
 using Ozon.Route256.Five.OrderService.Cqrs;
 using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
-using Ozon.Route256.Five.OrderService.Repository.Abstractions;
+using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 
 namespace Ozon.Route256.Five.OrderService.Features.GetRegions;
 

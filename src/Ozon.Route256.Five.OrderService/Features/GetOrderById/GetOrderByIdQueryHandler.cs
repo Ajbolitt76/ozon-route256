@@ -5,7 +5,8 @@ using Ozon.Route256.Five.OrderService.Cqrs;
 using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
 using Ozon.Route256.Five.OrderService.Exceptions;
 using Ozon.Route256.Five.OrderService.Exceptions.Grpc;
-using Ozon.Route256.Five.OrderService.Repository.Abstractions;
+using Ozon.Route256.Five.OrderService.Services.Redis;
+using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 
 namespace Ozon.Route256.Five.OrderService.Features.GetOrderById;
 
@@ -13,26 +14,38 @@ public class GetOrderByIdQueryHandler : IQueryHandler<GetOrderByIdQuery, GetOrde
 {
     private readonly IOrderRepository _orderRepository;
     private readonly Customers.CustomersClient _customersClient;
+    private readonly IRedisCache _redisCache;
 
-    public GetOrderByIdQueryHandler(IOrderRepository orderRepository, Customers.CustomersClient customersClient)
+    public GetOrderByIdQueryHandler(
+        IOrderRepository orderRepository,
+        Customers.CustomersClient customersClient,
+        IRedisCache redisCache)
     {
         _orderRepository = orderRepository;
         _customersClient = customersClient;
+        _redisCache = redisCache;
     }
-    
+
     public async Task<HandlerResult<GetOrderByIdResponse>> Handle(GetOrderByIdQuery request, CancellationToken token)
     {
         var order = await _orderRepository.GetOrderById(request.Id, token);
 
         if (order is null)
             return NotFoundException.WithStandardMessage<Order>(request.Id);
-        
-        var customer = await _customersClient.GetCustomerAsync(new()
-        {
-            Id = order.Customer.Id
-        }, cancellationToken: token).ToHandlerResult(); 
-        
-        if(!customer.Success)
+
+        var customer = await _redisCache.GetOrSetAsync(
+            request.Id.ToString(),
+            async () => await _customersClient.GetCustomerAsync(
+                new()
+                {
+                    Id = order.Customer.Id
+                },
+                cancellationToken: token),
+            null,
+            token)
+            .ToHandlerResult();
+
+        if (!customer.Success)
             return HandlerResult<GetOrderByIdResponse>.FromError(customer.Error);
 
         return new GetOrderByIdResponse(

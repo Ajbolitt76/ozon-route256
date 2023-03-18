@@ -4,7 +4,7 @@ using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
 using Ozon.Route256.Five.OrderService.Exceptions;
 using Ozon.Route256.Five.OrderService.Exceptions.Grpc;
 using Ozon.Route256.Five.OrderService.Model;
-using Ozon.Route256.Five.OrderService.Repository.Abstractions;
+using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 
 namespace Ozon.Route256.Five.OrderService.Features.CancelOrder;
 

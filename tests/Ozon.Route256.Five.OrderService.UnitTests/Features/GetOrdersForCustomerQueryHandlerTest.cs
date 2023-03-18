@@ -8,17 +8,15 @@ using Ozon.Route256.Five.OrderService.Exceptions;
 using Ozon.Route256.Five.OrderService.Features.GetOrdersForCustomer;
 using Ozon.Route256.Five.OrderService.Mappings;
 using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
-using Ozon.Route256.Five.OrderService.Repository.Abstractions;
+using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 using Ozon.Route256.Five.OrderService.UnitTests.CommonMocks;
 using Ozon.Route256.Five.OrderService.UnitTests.Extensions;
 using Ozon.Route256.Five.OrderService.UnitTests.Grpc;
 
 namespace Ozon.Route256.Five.OrderService.UnitTests.Features;
 
-public class GetOrdersForCustomerQueryHandlerTest
+public class GetOrdersForCustomerQueryHandlerTest : BaseUnitTest
 {
-    private readonly Faker _faker = new Faker();
-
     /// <summary>
     /// GetAllOrders должен возвращать данные, и делать запрос в cutomerService
     /// </summary>
@@ -43,7 +41,10 @@ public class GetOrdersForCustomerQueryHandlerTest
                     It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<OrderAggregate>() { orderData });
 
-        var handler = new GetOrdersForCustomerQueryHandler(orderRepositoryMock.Object, customersMock.Object);
+        var handler = new GetOrdersForCustomerQueryHandler(
+            orderRepositoryMock.Object, 
+            customersMock.Object,
+            PassthroughCache.Object);
         var result = await handler.Handle(
             new GetOrdersForCustomerQuery(1, DateTime.Today, 1, 2),
             default);
@@ -89,7 +90,10 @@ public class GetOrdersForCustomerQueryHandlerTest
                     null!,
                     exception: new RpcException(new Status(StatusCode.NotFound, "Not found"))));
         
-        var handler = new GetOrdersForCustomerQueryHandler(orderRepositoryMock.Object, customersMock.Object);
+        var handler = new GetOrdersForCustomerQueryHandler(
+            orderRepositoryMock.Object,
+            customersMock.Object,
+            PassthroughCache.Object);
         var result = await handler.Handle(
             new GetOrdersForCustomerQuery(1, DateTime.Today, 1, 2),
             default);

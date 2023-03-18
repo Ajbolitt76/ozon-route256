@@ -1,5 +1,5 @@
 using FluentAssertions;
-using Ozon.Route256.Five.OrderService.DbClientBalancer;
+using Ozon.Route256.Five.OrderService.Services.DbClientBalancer;
 
 namespace Ozon.Route256.Five.OrderService.UnitTests.DbClientBalancer;
 

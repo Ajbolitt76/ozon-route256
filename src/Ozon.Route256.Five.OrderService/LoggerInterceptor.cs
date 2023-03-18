@@ -3,7 +3,7 @@ using Grpc.Core.Interceptors;
 
 namespace Ozon.Route256.Five.OrderService;
 
-public class LoggerInterceptor: Interceptor
+public partial class LoggerInterceptor: Interceptor
 {
     private readonly ILogger<LoggerInterceptor> _logger;
 
@@ -17,8 +17,7 @@ public class LoggerInterceptor: Interceptor
         ClientInterceptorContext<TRequest, TResponse> context,
         AsyncUnaryCallContinuation<TRequest, TResponse> continuation)
     {
-        _logger.LogInformation("Отправлено сообщение в GRPC: {0}", request);
-
+        LogOutcoming(context.Method.Name, request);
         return base.AsyncUnaryCall(request, context, continuation);
     }
 
@@ -27,8 +26,7 @@ public class LoggerInterceptor: Interceptor
         ClientInterceptorContext<TRequest, TResponse> context,
         BlockingUnaryCallContinuation<TRequest, TResponse> continuation)
     {
-        _logger.LogInformation("Отправлено сообщение в GRPC: {0}", request);
-
+        LogOutcoming(context.Method.Name, request);
         return base.BlockingUnaryCall(request, context, continuation);
     }
 
@@ -37,8 +35,20 @@ public class LoggerInterceptor: Interceptor
         ServerCallContext context,
         UnaryServerMethod<TRequest, TResponse> continuation)
     {
-        _logger.LogInformation("Отправлено сообщение в GRPC: {0}", request);
+        LogIncoming(context.Method, request);
         return base.UnaryServerHandler(request, context, continuation);
     }
 
+    [LoggerMessage(
+        EventId = 1,
+        Level = LogLevel.Information,
+        Message = "Входящий вызов {handlerName}\n {request}")]
+    private partial void LogIncoming(string handlerName, object request);
+    
+    
+    [LoggerMessage(
+        EventId = 1,
+        Level = LogLevel.Information,
+        Message = "Исходящий вызов {handlerName}.\n {request}")]
+    private partial void LogOutcoming(string handlerName, object request);
 }

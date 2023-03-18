@@ -6,13 +6,13 @@ using Ozon.Route256.Five.OrderService.Exceptions;
 using Ozon.Route256.Five.OrderService.Features.GetAllOrders;
 using Ozon.Route256.Five.OrderService.Mappings;
 using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
-using Ozon.Route256.Five.OrderService.Repository.Abstractions;
+using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 using Ozon.Route256.Five.OrderService.UnitTests.CommonMocks;
 using Ozon.Route256.Five.OrderService.UnitTests.Extensions;
 
 namespace Ozon.Route256.Five.OrderService.UnitTests.Features;
 
-public class GetAllOrdersQueryHandlerTest
+public class GetAllOrdersQueryHandlerTest : BaseUnitTest
 {
     private readonly Faker _faker = new Faker();
     private readonly string[] _knownRegions;
@@ -57,7 +57,8 @@ public class GetAllOrdersQueryHandlerTest
         var handler = new GetAllOrdersQueryHandler(
             _regionRepositoryMock.Object, 
             orderRepositoryMock.Object,
-            customersMock.Object);
+            customersMock.Object,
+            PassthroughCache.Object);
 
         var result = await handler.Handle(
             new GetAllOrdersQuery(new List<string>{ _knownRegions[0] }, true, 0, 0),
@@ -96,7 +97,8 @@ public class GetAllOrdersQueryHandlerTest
         var handler = new GetAllOrdersQueryHandler(
             _regionRepositoryMock.Object, 
             orderRepositoryMock.Object,
-            customersMock.Object);
+            customersMock.Object,
+            PassthroughCache.Object);
 
         var result = await handler.Handle(
             new GetAllOrdersQuery(new List<string>

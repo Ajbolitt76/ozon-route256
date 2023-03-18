@@ -11,3 +11,15 @@ public abstract class GenericTaskExceptionWrapper<TAwaitable, TValue>
 
     public abstract TaskErrorWrapperAwaiter<TValue> GetAwaiter();
 }
+
+public abstract class GenericTaskExceptionWrapper<TAwaitable>
+{
+    public GenericTaskExceptionWrapper(TAwaitable call)
+    {
+        InnerAwaitable = call;
+    }
+
+    public TAwaitable InnerAwaitable { get; }
+
+    public abstract TaskErrorWrapperAwaiter GetAwaiter();
+}

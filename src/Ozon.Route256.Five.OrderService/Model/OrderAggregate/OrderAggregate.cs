@@ -6,7 +6,7 @@ public record OrderAggregate(
     CustomerDto Customer,
     List<OrderGood> Goods,
     DateTime OrderedAt,
-    string OrderType)
+    OrderType OrderType)
 {
     public decimal TotalPrice { get; } = Goods.Sum(x => x.Price);
     
