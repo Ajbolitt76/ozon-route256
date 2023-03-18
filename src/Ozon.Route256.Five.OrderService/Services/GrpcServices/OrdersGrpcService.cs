@@ -6,7 +6,7 @@ using Ozon.Route256.Five.OrderService.Features.GetOrderById;
 using Ozon.Route256.Five.OrderService.Mappings;
 using Ozon.Route256.Five.OrdersService.Grpc;
 
-namespace Ozon.Route256.Five.OrderService.GrpcServices;
+namespace Ozon.Route256.Five.OrderService.Services.GrpcServices;
 
 public class OrdersGrpcService : Orders.OrdersBase
 {
@@ -37,7 +37,7 @@ public class OrdersGrpcService : Orders.OrdersBase
             Id = response.Id,
             OrderState = response.OrderState.ToOrderServiceDto(),
             ItemsCount = (uint)response.ItemsCount,
-            OrderedAt = Timestamp.FromDateTime(response.OrderedAt),
+            OrderedAt = Timestamp.FromDateTime(response.OrderedAt.ToUniversalTime()),
             ClientName = response.ClientName,
             ShippingAddress = response.ShippingAddress.ToOrderServiceDto(),
             Phone = response.Phone,
