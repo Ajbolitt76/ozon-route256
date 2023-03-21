@@ -22,8 +22,8 @@ public static class KafkaServiceCollectionsExtensions
         sc.AddSingleton<IKafkaBinaryProducer, KafkaBinaryProducer>();
 
         sc.RegisterDeserializers()
-            .AddConsumer<long, PreOrderMessage, PreOrderConsumer>(configuration)
-            .AddConsumer<string, OrderEventMessage, OrderUpdateConsumer>(configuration);
+            .AddConsumer<long, PreOrderMessage, PreOrderConsumerHandler>(configuration)
+            .AddConsumer<string, OrderEventMessage, OrderUpdateConsumerHandler>(configuration);
 
         sc.AddProducer<string, NewOrderMessage, NewOrderMessageProducer>(configuration);
 

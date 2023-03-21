@@ -7,5 +7,10 @@ namespace Ozon.Route256.Five.OrderService.UnitTests;
 
 public abstract class BaseUnitTest
 {
+    protected BaseUnitTest()
+    {
+        
+    }
+    
     public Mock<IRedisCache> PassthroughCache { get; set; } = CacheMockHelper.CreatePassthroughCache();
 }

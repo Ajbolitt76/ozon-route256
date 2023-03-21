@@ -4,12 +4,12 @@ using Ozon.Route256.Five.OrderService.Features.ProcessGeneratedOrder;
 
 namespace Ozon.Route256.Five.OrderService.Services.Kafka.Consumers.Implementations;
 
-public class PreOrderConsumer : IKafkaConsumerHandler<long, PreOrderMessage>
+public class PreOrderConsumerHandler : IKafkaConsumerHandler<long, PreOrderMessage>
 {
     private readonly ICommandDispatcher _commandDispatcher;
-    private readonly ILogger<PreOrderConsumer> _logger;
+    private readonly ILogger<PreOrderConsumerHandler> _logger;
 
-    public PreOrderConsumer(ICommandDispatcher commandDispatcher, ILogger<PreOrderConsumer> logger)
+    public PreOrderConsumerHandler(ICommandDispatcher commandDispatcher, ILogger<PreOrderConsumerHandler> logger)
     {
         _commandDispatcher = commandDispatcher;
         _logger = logger;

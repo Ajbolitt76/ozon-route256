@@ -4,11 +4,11 @@ using Ozon.Route256.Five.OrderService.Features.UpdateOrderStatus;
 
 namespace Ozon.Route256.Five.OrderService.Services.Kafka.Consumers.Implementations;
 
-public class OrderUpdateConsumer : IKafkaConsumerHandler<string, OrderEventMessage>
+public class OrderUpdateConsumerHandler : IKafkaConsumerHandler<string, OrderEventMessage>
 {
     private readonly ICommandDispatcher _commandDispatcher;
 
-    public OrderUpdateConsumer(ICommandDispatcher commandDispatcher)
+    public OrderUpdateConsumerHandler(ICommandDispatcher commandDispatcher)
     {
         _commandDispatcher = commandDispatcher;
     }
