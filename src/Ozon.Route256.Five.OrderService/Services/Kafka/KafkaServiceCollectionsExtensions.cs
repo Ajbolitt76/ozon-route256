@@ -40,7 +40,7 @@ public static class KafkaServiceCollectionsExtensions
 
         _ = kafkaOptions?.ProducerSettings.GetValueOrDefault(TProducer.ProducerName)
             ?? throw new InvalidOperationException(
-                $"Не задан конфиг для консьюмера {TProducer.ProducerName}");
+                $"Не задан конфиг для продьюсера {TProducer.ProducerName}");
 
         sc.AddSingleton<IMessageProducer<TKey, TMessage>, TProducer>();
 

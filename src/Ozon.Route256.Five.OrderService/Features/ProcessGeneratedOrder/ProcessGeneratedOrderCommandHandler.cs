@@ -13,7 +13,7 @@ namespace Ozon.Route256.Five.OrderService.Features.ProcessGeneratedOrder;
 
 public class ProcessGeneratedOrderCommandHandler : ICommandHandler<ProcessGeneratedOrderCommand>
 {
-    private const int MaximalDistanceFromWareHouse = 5000;
+    private const int MaximalDistanceFromWareHouse = 5000 * 1000;
     private readonly ILogger<ProcessGeneratedOrderCommandHandler> _logger;
     private readonly IOrderRepository _orderRepository;
     private readonly IRegionRepository _regionRepository;

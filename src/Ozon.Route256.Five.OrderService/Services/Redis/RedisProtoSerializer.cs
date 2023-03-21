@@ -10,7 +10,7 @@ public class RedisProtoSerializer<T> : IRedisSerializer<T> where T : IMessage<T>
 {
     private readonly MessageParser<T> _parser;
 
-    public RedisProtoSerializer(MessageParser<T> parser)
+    public RedisProtoSerializer()
     {
         var targetType = typeof(T);
         _parser = targetType

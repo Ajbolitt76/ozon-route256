@@ -6,7 +6,8 @@ using Ozon.Route256.Five.OrderService.Services.Kafka.Settings;
 
 namespace Ozon.Route256.Five.OrderService.Services.Kafka.Producers.Implementations;
 
-public class NewOrderMessageProducer : BaseKeyedProducer<NewOrderMessageProducer, string, NewOrderMessage>
+public class NewOrderMessageProducer : BaseKeyedProducer<NewOrderMessageProducer, string, NewOrderMessage>,
+                                       IMessageProducer<string, NewOrderMessage>
 {
     public NewOrderMessageProducer(IKafkaBinaryProducer kafkaBinaryProducer, IOptions<KafkaOptions> kafkaOptions) :
         base(kafkaBinaryProducer, kafkaOptions)
@@ -15,6 +16,6 @@ public class NewOrderMessageProducer : BaseKeyedProducer<NewOrderMessageProducer
 
     protected override byte[] SerializeKey(string key)
         => Encoding.UTF8.GetBytes(key);
-    
+
     public static string ProducerName => "NewOrderProducer";
 }

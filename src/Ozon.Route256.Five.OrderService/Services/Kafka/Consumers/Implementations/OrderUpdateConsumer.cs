@@ -12,13 +12,13 @@ public class OrderUpdateConsumer : IKafkaConsumerHandler<string, OrderEventMessa
     {
         _commandDispatcher = commandDispatcher;
     }
-
+    
+    public static string ConsumerName => "OrderUpdateConsumer";
+    
     public Task Handle(string key, OrderEventMessage message, CancellationToken token)
     {
         return _commandDispatcher.Dispatch(
             new UpdateOrderStatusCommand(message.OrderId, message.NewState, message.ChangedAt),
             token);
     }
-
-    public static string ConsumerName => "OrderUpdateConsumer";
 }

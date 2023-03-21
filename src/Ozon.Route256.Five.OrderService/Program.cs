@@ -36,4 +36,4 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 app.MapGrpcService<OrdersGrpcService>();
 
-// app.Run();
+app.Run();

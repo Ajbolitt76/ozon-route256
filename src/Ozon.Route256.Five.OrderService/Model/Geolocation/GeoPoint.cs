@@ -2,6 +2,9 @@ namespace Ozon.Route256.Five.OrderService.Model.Geolocation;
 
 public record GeoPoint(double Latitude, double Longitude)
 {
+    /// <summary>
+    /// Дистанция между точками в метрах
+    /// </summary>
     public double DistanceTo(GeoPoint point)
     {
         var d1 = Latitude * (Math.PI / 180.0);
