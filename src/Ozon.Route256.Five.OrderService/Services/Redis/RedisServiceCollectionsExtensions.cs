@@ -11,8 +11,10 @@ public static class RedisServiceCollectionsExtensions
                 configuration.GetConnectionString("RedisConnection")
                 ?? throw new ApplicationException("Не указанно подключение к Redis")));
 
-        sc.AddScoped(typeof(IRedisCache), typeof(CacheRedisStore));
-        sc.AddScoped(typeof(IRedisSerializer<>), typeof(RedisSerializerFactory<>));
+        sc.AddScoped(typeof(RedisJsonSerializer<>));
+        sc.AddScoped(typeof(RedisProtoSerializer<>));
+        sc.AddScoped(typeof(IRedisCache), typeof(CacheRedisCache));
+        sc.AddScoped(typeof(IRedisSerializer<>), typeof(UniversalRedisSerializer<>));
         
         sc.AddOptions<CacheOptions>()
             .Bind(configuration.GetSection(nameof(CacheOptions)))

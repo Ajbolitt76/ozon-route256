@@ -1,4 +1,5 @@
 using Ozon.Route256.Five.CustomersService.Grpc;
+using Ozon.Route256.Five.OrderService.Consts;
 using Ozon.Route256.Five.OrderService.Contracts.GetOrders;
 using Ozon.Route256.Five.OrderService.Cqrs;
 using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
@@ -41,6 +42,7 @@ public class GetAllOrdersQueryHandler : IQueryHandler<GetAllOrdersQuery, GetOrde
         }
 
         var customerData = (await _redisCache.GetOrSetAsync(
+                CacheKeys.AllCustomersCacheKey,
                 () => _customersClient.GetCustomersAsync(new(), cancellationToken: token).ResponseAsync,
                 null,
                 token))

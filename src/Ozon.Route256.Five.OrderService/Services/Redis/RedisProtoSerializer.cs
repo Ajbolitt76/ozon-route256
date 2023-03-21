@@ -12,7 +12,11 @@ public class RedisProtoSerializer<T> : IRedisSerializer<T> where T : IMessage<T>
 
     public RedisProtoSerializer(MessageParser<T> parser)
     {
-        _parser = parser;
+        var targetType = typeof(T);
+        _parser = targetType
+                      .GetProperty("Parser")
+                      ?.GetValue(null) as MessageParser<T>
+                  ?? throw new NotSupportedException($"{targetType.Name} не содержит свойства Parser");
     }
 
     public RedisValue Serialize(T? value)

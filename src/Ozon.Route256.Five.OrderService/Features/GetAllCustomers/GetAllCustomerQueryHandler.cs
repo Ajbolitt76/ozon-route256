@@ -1,5 +1,6 @@
 using Google.Protobuf.WellKnownTypes;
 using Ozon.Route256.Five.CustomersService.Grpc;
+using Ozon.Route256.Five.OrderService.Consts;
 using Ozon.Route256.Five.OrderService.Contracts.GetAllCustomers;
 using Ozon.Route256.Five.OrderService.Cqrs;
 using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
@@ -25,6 +26,7 @@ public class GetAllCustomerQueryHandler : IQueryHandler<GetAllCustomerQuery, Get
         CancellationToken token)
     {
         var result = await _cache.GetOrSetAsync(
+            CacheKeys.AllCustomersCacheKey,
             () => _customersClient.GetCustomersAsync(new Empty(), cancellationToken: token).ResponseAsync,
             null,
             token);

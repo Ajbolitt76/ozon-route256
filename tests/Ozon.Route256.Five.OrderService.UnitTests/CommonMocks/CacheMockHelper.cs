@@ -16,15 +16,7 @@ public static class CacheMockHelper
                 It.IsAny<CancellationToken>()))
             .Returns(new InvocationFunc(
                 inv => ((Delegate)inv.Arguments[1]).DynamicInvoke()));
-        
-        mock.Setup(
-                x => x.GetOrSetAsync(
-                    It.IsAny<Func<Task<It.IsAnyType>>>(),
-                    It.IsAny<TimeSpan?>(),
-                    It.IsAny<CancellationToken>()))
-            .Returns(new InvocationFunc(
-                inv => ((Delegate)inv.Arguments[0]).DynamicInvoke()));
-        
+
         return mock;
     }
 }

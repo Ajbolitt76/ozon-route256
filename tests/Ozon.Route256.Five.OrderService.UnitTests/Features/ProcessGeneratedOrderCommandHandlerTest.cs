@@ -4,6 +4,7 @@ using Ozon.Route256.Five.OrderService.Contracts.KafkaMessages.NewOrder;
 using Ozon.Route256.Five.OrderService.Features.ProcessGeneratedOrder;
 using Ozon.Route256.Five.OrderService.Model;
 using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
+using Ozon.Route256.Five.OrderService.Services.Domain;
 using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 using Ozon.Route256.Five.OrderService.UnitTests.CommonMocks;
 using Ozon.Route256.Five.OrderService.UnitTests.Extensions;
@@ -38,10 +39,10 @@ public class ProcessGeneratedOrderCommandHandlerTest : BaseUnitTest
 
         var regionRepositoryMock = new Mock<IRegionRepository>();
         regionRepositoryMock.Setup(
-                x => x.GetRegionWarehouse(fakeOrder.Customer.Address.Region, It.IsAny<CancellationToken>()))
+                x => x.GetRegionWarehouseAddress(fakeOrder.Customer.Address.Region, It.IsAny<CancellationToken>()))
             .ReturnsAsync(fakeAddress);
 
-        var producerMock = new ProducerMock<NewOrderMessage>();
+        var producerMock = new ProducerMock<string, NewOrderMessage>();
         var command = new ProcessGeneratedOrderCommand(
             fakeOrder.Id,
             fakeOrder.OrderType,
@@ -53,7 +54,7 @@ public class ProcessGeneratedOrderCommandHandlerTest : BaseUnitTest
             orderRepositoryMock.Object,
             regionRepositoryMock.Object,
             producerMock.Object,
-            DateTimeProvider.Object);
+            new DateTimeProvider());
         var result = await handler.Handle(command, default);
 
         result.Should().BeSuccessful();
@@ -62,7 +63,7 @@ public class ProcessGeneratedOrderCommandHandlerTest : BaseUnitTest
         producerMock.SentMessages.Should()
             .ContainSingle()
             .Which
-            .Should().Be(new NewOrderMessage(fakeOrder.Id));
+            .Should().Be((fakeOrder.Id.ToString(), new NewOrderMessage(fakeOrder.Id)));
     }
     
         /// <summary>
@@ -95,10 +96,10 @@ public class ProcessGeneratedOrderCommandHandlerTest : BaseUnitTest
 
         var regionRepositoryMock = new Mock<IRegionRepository>();
         regionRepositoryMock.Setup(
-                x => x.GetRegionWarehouse(fakeOrder.Customer.Address.Region, It.IsAny<CancellationToken>()))
+                x => x.GetRegionWarehouseAddress(fakeOrder.Customer.Address.Region, It.IsAny<CancellationToken>()))
             .ReturnsAsync(fakeAddress);
 
-        var producerMock = new ProducerMock<NewOrderMessage>();
+        var producerMock = new ProducerMock<string, NewOrderMessage>();
         var command = new ProcessGeneratedOrderCommand(
             fakeOrder.Id,
             fakeOrder.OrderType,
@@ -110,7 +111,7 @@ public class ProcessGeneratedOrderCommandHandlerTest : BaseUnitTest
             orderRepositoryMock.Object,
             regionRepositoryMock.Object,
             producerMock.Object,
-            DateTimeProvider.Object);
+            new DateTimeProvider());
         var result = await handler.Handle(command, default);
 
         result.Should().BeSuccessful();

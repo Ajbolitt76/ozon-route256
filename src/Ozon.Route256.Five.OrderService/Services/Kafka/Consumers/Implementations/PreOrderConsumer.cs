@@ -14,6 +14,8 @@ public class PreOrderConsumer : IKafkaConsumerHandler<long, PreOrderMessage>
         _commandDispatcher = commandDispatcher;
         _logger = logger;
     }
+    
+    public static string ConsumerName => "PreOrderConsumer";
 
     public async Task Handle(long key, PreOrderMessage message, CancellationToken token)
     {
@@ -26,6 +28,4 @@ public class PreOrderConsumer : IKafkaConsumerHandler<long, PreOrderMessage>
             token);
         _logger.LogInformation("Обработали заказ {Id}", message.Id);
     }
-
-    public static string ConsumerName => "PreOrderConsumer";
 }
