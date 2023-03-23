@@ -4,9 +4,7 @@ using StackExchange.Redis;
 namespace Ozon.Route256.Five.OrderService.Services.Redis;
 
 /// <summary>
-/// Фабрика сериализаторов
-/// Если доступна Protobuf сериализация берем ее
-/// Если нет берм Json
+/// Сериализатор с поддержкой Protobuf и fallback на json
 /// </summary>
 public class UniversalRedisSerializer<T> : IRedisSerializer<T> where T : IMessage<T>
 {

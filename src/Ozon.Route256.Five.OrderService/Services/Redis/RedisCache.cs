@@ -3,16 +3,16 @@ using StackExchange.Redis;
 
 namespace Ozon.Route256.Five.OrderService.Services.Redis;
 
-public partial class CacheRedisCache : IRedisCache
+public partial class RedisCache : IRedisCache
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<CacheRedisCache> _logger;
+    private readonly ILogger<RedisCache> _logger;
     private readonly IConnectionMultiplexer _multiplexer;
     private readonly CacheOptions _cacheOptions;
     
-    public CacheRedisCache(
+    public RedisCache(
         IServiceProvider sp,
-        ILogger<CacheRedisCache> logger,
+        ILogger<RedisCache> logger,
         IConnectionMultiplexer multiplexer,
         IOptions<CacheOptions> cacheOptions)
     {
@@ -21,10 +21,6 @@ public partial class CacheRedisCache : IRedisCache
         _multiplexer = multiplexer;
         _cacheOptions = cacheOptions.Value;
     }
-
-    protected IDatabase Database => _multiplexer.GetDatabase(0);
-
-    protected string GetKey<T>(string key) => $"cache:{typeof(T).Name}:{key}";
     
     public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken)
     {
@@ -50,9 +46,13 @@ public partial class CacheRedisCache : IRedisCache
     public Task<bool> ExistsAsync<T>(string key, CancellationToken cancellationToken)
         => Database.KeyExistsAsync(GetKey<T>(key)).WaitAsync(cancellationToken);
 
-    protected IRedisSerializer<T> GetSerializer<T>() 
+    private IRedisSerializer<T> GetSerializer<T>() 
         => _serviceProvider.GetRequiredService<IRedisSerializer<T>>();
     
+    private IDatabase Database => _multiplexer.GetDatabase(0);
+
+    private string GetKey<T>(string key) => $"cache:{typeof(T).Name}:{key}";
+
     public async Task<T> GetOrSetAsync<T>(
         string key,
         Func<Task<T>> getter,
@@ -92,5 +92,5 @@ public partial class CacheRedisCache : IRedisCache
         EventId = 1,
         Level = LogLevel.Warning,
         Message = "Поптыка обратится к кэшу не удалась, игнорируем кэш")]
-    public partial void RedisCacheOperationFailed(Exception ex);
+    private partial void RedisCacheOperationFailed(Exception ex);
 }

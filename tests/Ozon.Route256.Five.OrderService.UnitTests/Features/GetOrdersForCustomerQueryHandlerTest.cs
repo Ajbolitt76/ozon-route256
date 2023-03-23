@@ -8,6 +8,7 @@ using Ozon.Route256.Five.OrderService.Exceptions;
 using Ozon.Route256.Five.OrderService.Features.GetOrdersForCustomer;
 using Ozon.Route256.Five.OrderService.Mappings;
 using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
+using Ozon.Route256.Five.OrderService.Services.MicroserviceClients;
 using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 using Ozon.Route256.Five.OrderService.UnitTests.CommonMocks;
 using Ozon.Route256.Five.OrderService.UnitTests.Extensions;
@@ -31,6 +32,8 @@ public class GetOrdersForCustomerQueryHandlerTest : BaseUnitTest
         };
 
         var customersMock = CustomerServiceMockHelper.WithGetCustomerData(customer);
+        var cachedClient = new CachedCustomersClient(customersMock.Object, PassthroughCache.Object);
+        
         var orderRepositoryMock = new Mock<IOrderRepository>();
         orderRepositoryMock.Setup(
                 x => x.GetAllForCustomer(
@@ -43,8 +46,7 @@ public class GetOrdersForCustomerQueryHandlerTest : BaseUnitTest
 
         var handler = new GetOrdersForCustomerQueryHandler(
             orderRepositoryMock.Object, 
-            customersMock.Object,
-            PassthroughCache.Object);
+            cachedClient);
         var result = await handler.Handle(
             new GetOrdersForCustomerQuery(1, DateTime.Today, 1, 2),
             default);
@@ -90,10 +92,11 @@ public class GetOrdersForCustomerQueryHandlerTest : BaseUnitTest
                     null!,
                     exception: new RpcException(new Status(StatusCode.NotFound, "Not found"))));
         
+        var cachedClient = new CachedCustomersClient(customersMock.Object, PassthroughCache.Object);
+        
         var handler = new GetOrdersForCustomerQueryHandler(
             orderRepositoryMock.Object,
-            customersMock.Object,
-            PassthroughCache.Object);
+            cachedClient);
         var result = await handler.Handle(
             new GetOrdersForCustomerQuery(1, DateTime.Today, 1, 2),
             default);

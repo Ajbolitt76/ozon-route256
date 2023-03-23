@@ -5,6 +5,7 @@ using Ozon.Route256.Five.OrderService.Cqrs;
 using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
 using Ozon.Route256.Five.OrderService.Exceptions;
 using Ozon.Route256.Five.OrderService.Exceptions.Grpc;
+using Ozon.Route256.Five.OrderService.Services.MicroserviceClients;
 using Ozon.Route256.Five.OrderService.Services.Redis;
 using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 
@@ -13,17 +14,15 @@ namespace Ozon.Route256.Five.OrderService.Features.GetOrderById;
 public class GetOrderByIdQueryHandler : IQueryHandler<GetOrderByIdQuery, GetOrderByIdResponse>
 {
     private readonly IOrderRepository _orderRepository;
-    private readonly Customers.CustomersClient _customersClient;
     private readonly IRedisCache _redisCache;
+    private readonly ICachedCustomersClient _cachedCustomersClient;
 
     public GetOrderByIdQueryHandler(
         IOrderRepository orderRepository,
-        Customers.CustomersClient customersClient,
-        IRedisCache redisCache)
+        ICachedCustomersClient cachedCustomersClient)
     {
         _orderRepository = orderRepository;
-        _customersClient = customersClient;
-        _redisCache = redisCache;
+        _cachedCustomersClient = cachedCustomersClient;
     }
 
     public async Task<HandlerResult<GetOrderByIdResponse>> Handle(GetOrderByIdQuery request, CancellationToken token)
@@ -33,16 +32,7 @@ public class GetOrderByIdQueryHandler : IQueryHandler<GetOrderByIdQuery, GetOrde
         if (order is null)
             return NotFoundException.WithStandardMessage<Order>(request.Id);
 
-        var customer = await _redisCache.GetOrSetAsync(
-            request.Id.ToString(),
-            async () => await _customersClient.GetCustomerAsync(
-                new()
-                {
-                    Id = order.Customer.Id
-                },
-                cancellationToken: token),
-            null,
-            token)
+        var customer = await _cachedCustomersClient.GetCustomerById(order.Customer.Id, token)
             .ToHandlerResult();
 
         if (!customer.Success)

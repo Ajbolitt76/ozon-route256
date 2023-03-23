@@ -14,8 +14,8 @@ public class NewOrderMessageProducer : BaseKeyedProducer<NewOrderMessageProducer
     {
     }
 
+    public static string ProducerName => "NewOrderProducer";
+    
     protected override byte[] SerializeKey(string key)
         => Encoding.UTF8.GetBytes(key);
-
-    public static string ProducerName => "NewOrderProducer";
 }

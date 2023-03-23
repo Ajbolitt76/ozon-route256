@@ -4,6 +4,7 @@ using Ozon.Route256.Five.OrderService.Cqrs;
 using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
 using Ozon.Route256.Five.OrderService.Exceptions;
 using Ozon.Route256.Five.OrderService.Exceptions.Grpc;
+using Ozon.Route256.Five.OrderService.Services.MicroserviceClients;
 using Ozon.Route256.Five.OrderService.Services.Redis;
 using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 
@@ -13,32 +14,21 @@ public class GetOrdersForCustomerQueryHandler
     : IQueryHandler<GetOrdersForCustomerQuery, GetAllOrdersForCustomerResponse>
 {
     private readonly IOrderRepository _orderRepository;
-    private readonly Customers.CustomersClient _customersClient;
-    private readonly IRedisCache _redisCache;
+    private readonly ICachedCustomersClient _cachedCustomersClient;
 
     public GetOrdersForCustomerQueryHandler(
         IOrderRepository orderRepository,
-        Customers.CustomersClient customersClient,
-        IRedisCache redisCache)
+        ICachedCustomersClient cachedCustomersClient)
     {
         _orderRepository = orderRepository;
-        _customersClient = customersClient;
-        _redisCache = redisCache;
+        _cachedCustomersClient = cachedCustomersClient;
     }
 
     public async Task<HandlerResult<GetAllOrdersForCustomerResponse>> Handle(
         GetOrdersForCustomerQuery request,
         CancellationToken token)
     {
-        var clientInfoResult = await _redisCache.GetOrSetAsync(
-            request.ClientId.ToString(),
-            () => _customersClient.GetCustomerAsync(
-                new GetCustomerByIdRequest()
-                {
-                    Id = request.ClientId
-                }).ResponseAsync,
-            null,
-            cancellationToken: token).ToHandlerResult();
+        var clientInfoResult = await _cachedCustomersClient.GetCustomerById(request.ClientId, token).ToHandlerResult();
 
         if (!clientInfoResult.Success)
             return HandlerResult<GetAllOrdersForCustomerResponse>.FromError(clientInfoResult.Error);

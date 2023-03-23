@@ -1,7 +1,9 @@
 using FluentAssertions;
+using Moq;
 using Ozon.Route256.Five.OrderService.Contracts.GetAllCustomers;
 using Ozon.Route256.Five.OrderService.Features.GetAllCustomers;
 using Ozon.Route256.Five.OrderService.Mappings;
+using Ozon.Route256.Five.OrderService.Services.MicroserviceClients;
 using Ozon.Route256.Five.OrderService.UnitTests.CommonMocks;
 using Ozon.Route256.Five.OrderService.UnitTests.Extensions;
 
@@ -18,8 +20,9 @@ public class GetAllCustomersQueryHandlerTest : BaseUnitTest
         var customers = FakeDataGenerators.CustomerServiceCustomerDtos.Take(10).ToList();
 
         var customersMock = CustomerServiceMockHelper.WithGetCustomersData(customers);
-
-        var handler = new GetAllCustomerQueryHandler(customersMock.Object, PassthroughCache.Object);
+        var cachedClient = new CachedCustomersClient(customersMock.Object, PassthroughCache.Object);
+        
+        var handler = new GetAllCustomerQueryHandler(cachedClient);
         var result = await handler.Handle(new GetAllCustomerQuery(), default);
 
         result

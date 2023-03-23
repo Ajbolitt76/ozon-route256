@@ -6,6 +6,7 @@ using Ozon.Route256.Five.OrderService.Exceptions;
 using Ozon.Route256.Five.OrderService.Features.GetAllOrders;
 using Ozon.Route256.Five.OrderService.Mappings;
 using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
+using Ozon.Route256.Five.OrderService.Services.MicroserviceClients;
 using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 using Ozon.Route256.Five.OrderService.UnitTests.CommonMocks;
 using Ozon.Route256.Five.OrderService.UnitTests.Extensions;
@@ -41,6 +42,8 @@ public class GetAllOrdersQueryHandlerTest : BaseUnitTest
         };
 
         var customersMock = CustomerServiceMockHelper.WithGetCustomersData(new[] { customer });
+        var cachedClient = new CachedCustomersClient(customersMock.Object, PassthroughCache.Object);
+        
         var orderRepositoryMock = new Mock<IOrderRepository>();
         orderRepositoryMock.Setup(
                 x => x.GetAllByRegions(
@@ -57,8 +60,7 @@ public class GetAllOrdersQueryHandlerTest : BaseUnitTest
         var handler = new GetAllOrdersQueryHandler(
             _regionRepositoryMock.Object, 
             orderRepositoryMock.Object,
-            customersMock.Object,
-            PassthroughCache.Object);
+            cachedClient);
 
         var result = await handler.Handle(
             new GetAllOrdersQuery(new List<string>{ _knownRegions[0] }, true, 0, 0),
@@ -92,13 +94,14 @@ public class GetAllOrdersQueryHandlerTest : BaseUnitTest
         var customer = FakeDataGenerators.CustomerServiceCustomerDtos.First();
         
         var customersMock = CustomerServiceMockHelper.WithGetCustomersData(new[] { customer });
+        var cachedClient = new CachedCustomersClient(customersMock.Object, PassthroughCache.Object);
+        
         var orderRepositoryMock = new Mock<IOrderRepository>();
-
+        
         var handler = new GetAllOrdersQueryHandler(
             _regionRepositoryMock.Object, 
             orderRepositoryMock.Object,
-            customersMock.Object,
-            PassthroughCache.Object);
+            cachedClient);
 
         var result = await handler.Handle(
             new GetAllOrdersQuery(new List<string>

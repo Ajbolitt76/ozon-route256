@@ -13,7 +13,7 @@ public static class RedisServiceCollectionsExtensions
 
         sc.AddScoped(typeof(RedisJsonSerializer<>));
         sc.AddScoped(typeof(RedisProtoSerializer<>));
-        sc.AddScoped(typeof(IRedisCache), typeof(CacheRedisCache));
+        sc.AddScoped(typeof(IRedisCache), typeof(RedisCache));
         sc.AddScoped(typeof(IRedisSerializer<>), typeof(UniversalRedisSerializer<>));
         
         sc.AddOptions<CacheOptions>()
