@@ -1,7 +1,6 @@
 using Ozon.Route256.Five.OrderService.Contracts.KafkaMessages.NewOrder;
 using Ozon.Route256.Five.OrderService.Cqrs;
 using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
-using Ozon.Route256.Five.OrderService.Exceptions;
 using Ozon.Route256.Five.OrderService.Model;
 using Ozon.Route256.Five.OrderService.Model.Geolocation;
 using Ozon.Route256.Five.OrderService.Model.OrderAggregate;

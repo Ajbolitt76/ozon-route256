@@ -1,5 +1,4 @@
 using System.Text;
-using Confluent.Kafka;
 using Microsoft.Extensions.Options;
 using Ozon.Route256.Five.OrderService.Contracts.KafkaMessages.NewOrder;
 using Ozon.Route256.Five.OrderService.Services.Kafka.Settings;

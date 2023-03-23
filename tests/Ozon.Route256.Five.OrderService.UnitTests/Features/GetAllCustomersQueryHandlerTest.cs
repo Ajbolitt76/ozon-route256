@@ -1,5 +1,4 @@
 using FluentAssertions;
-using Moq;
 using Ozon.Route256.Five.OrderService.Contracts.GetAllCustomers;
 using Ozon.Route256.Five.OrderService.Features.GetAllCustomers;
 using Ozon.Route256.Five.OrderService.Mappings;

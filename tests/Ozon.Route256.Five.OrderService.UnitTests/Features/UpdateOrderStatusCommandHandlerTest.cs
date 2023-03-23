@@ -1,4 +1,3 @@
-using FluentAssertions;
 using Moq;
 using Ozon.Route256.Five.OrderService.Features.UpdateOrderStatus;
 using Ozon.Route256.Five.OrderService.Model;

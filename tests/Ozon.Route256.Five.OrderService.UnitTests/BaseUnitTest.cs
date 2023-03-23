@@ -1,5 +1,4 @@
 using Moq;
-using Ozon.Route256.Five.OrderService.Services.Domain;
 using Ozon.Route256.Five.OrderService.Services.Redis;
 using Ozon.Route256.Five.OrderService.UnitTests.CommonMocks;
 

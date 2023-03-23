@@ -1,10 +1,8 @@
-using Ozon.Route256.Five.CustomersService.Grpc;
 using Ozon.Route256.Five.LogisticsSimulator.Grpc;
 using Ozon.Route256.Five.OrderService.Contracts.GetOrderById;
 using Ozon.Route256.Five.OrderService.Cqrs;
 using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
 using Ozon.Route256.Five.OrderService.Exceptions;
-using Ozon.Route256.Five.OrderService.Exceptions.Grpc;
 using Ozon.Route256.Five.OrderService.Services.MicroserviceClients;
 using Ozon.Route256.Five.OrderService.Services.Redis;
 using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
@@ -14,7 +12,6 @@ namespace Ozon.Route256.Five.OrderService.Features.GetOrderById;
 public class GetOrderByIdQueryHandler : IQueryHandler<GetOrderByIdQuery, GetOrderByIdResponse>
 {
     private readonly IOrderRepository _orderRepository;
-    private readonly IRedisCache _redisCache;
     private readonly ICachedCustomersClient _cachedCustomersClient;
 
     public GetOrderByIdQueryHandler(

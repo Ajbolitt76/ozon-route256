@@ -1,12 +1,8 @@
-using Google.Protobuf.WellKnownTypes;
-using Ozon.Route256.Five.CustomersService.Grpc;
-using Ozon.Route256.Five.OrderService.Consts;
 using Ozon.Route256.Five.OrderService.Contracts.GetAllCustomers;
 using Ozon.Route256.Five.OrderService.Cqrs;
 using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
 using Ozon.Route256.Five.OrderService.Mappings;
 using Ozon.Route256.Five.OrderService.Services.MicroserviceClients;
-using Ozon.Route256.Five.OrderService.Services.Redis;
 
 namespace Ozon.Route256.Five.OrderService.Features.GetAllCustomers;
 
