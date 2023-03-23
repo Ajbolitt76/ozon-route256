@@ -77,6 +77,6 @@ public static class FakeDataGenerators
                     ModelCustomerDtos.First(),
                     ModelOrderGoods.Take(f.Random.Int(1, 15)).ToList(),
                     f.Date.Between(new(2022, 1, 1), DateTime.Now),
-                    f.Lorem.Word()))
+                    f.Random.Enum<OrderType>()))
             .GenerateForever();
 }

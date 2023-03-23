@@ -6,13 +6,14 @@ using Ozon.Route256.Five.OrderService.Exceptions;
 using Ozon.Route256.Five.OrderService.Features.GetOrderById;
 using Ozon.Route256.Five.OrderService.Mappings;
 using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
-using Ozon.Route256.Five.OrderService.Repository.Abstractions;
+using Ozon.Route256.Five.OrderService.Services.MicroserviceClients;
+using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 using Ozon.Route256.Five.OrderService.UnitTests.CommonMocks;
 using Ozon.Route256.Five.OrderService.UnitTests.Extensions;
 
 namespace Ozon.Route256.Five.OrderService.UnitTests.Features;
 
-public class GetOrderByIdQueryHandlerTest
+public class GetOrderByIdQueryHandlerTest : BaseUnitTest
 {
     private readonly Faker _faker = new Faker();
 
@@ -30,6 +31,8 @@ public class GetOrderByIdQueryHandlerTest
         };
 
         var customersMock = CustomerServiceMockHelper.WithGetCustomerData(customer);
+        var cachedClient = new CachedCustomersClient(customersMock.Object, PassthroughCache.Object);
+        
         var orderRepositoryMock = new Mock<IOrderRepository>();
         orderRepositoryMock.Setup(
                 x => x.GetOrderById(
@@ -37,7 +40,9 @@ public class GetOrderByIdQueryHandlerTest
                     It.IsAny<CancellationToken>()))
             .ReturnsAsync(orderData);
 
-        var handler = new GetOrderByIdQueryHandler(orderRepositoryMock.Object, customersMock.Object);
+        var handler = new GetOrderByIdQueryHandler(
+            orderRepositoryMock.Object, 
+            cachedClient);
         var result = await handler.Handle(
             new GetOrderByIdQuery(12),
             default);
@@ -69,6 +74,8 @@ public class GetOrderByIdQueryHandlerTest
         var customer = FakeDataGenerators.CustomerServiceCustomerDtos.First();
 
         var customersMock = CustomerServiceMockHelper.WithGetCustomerData(customer);
+        var cachedClient = new CachedCustomersClient(customersMock.Object, PassthroughCache.Object);
+        
         var orderRepositoryMock = new Mock<IOrderRepository>();
         orderRepositoryMock.Setup(
                 x => x.GetOrderById(
@@ -76,7 +83,9 @@ public class GetOrderByIdQueryHandlerTest
                     It.IsAny<CancellationToken>()))
             .ReturnsAsync((OrderAggregate?)null);
 
-        var handler = new GetOrderByIdQueryHandler(orderRepositoryMock.Object, customersMock.Object);
+        var handler = new GetOrderByIdQueryHandler(
+            orderRepositoryMock.Object,
+            cachedClient);
         var result = await handler.Handle(
             new GetOrderByIdQuery(12),
             default);

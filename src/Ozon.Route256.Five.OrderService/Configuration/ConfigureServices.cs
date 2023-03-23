@@ -1,6 +1,8 @@
-using Ozon.Route256.Five.OrderService.DbClientBalancer;
-using Ozon.Route256.Five.OrderService.Repository;
-using Ozon.Route256.Five.OrderService.Repository.Abstractions;
+using Ozon.Route256.Five.OrderService.Services.DbClientBalancer;
+using Ozon.Route256.Five.OrderService.Services.Domain;
+using Ozon.Route256.Five.OrderService.Services.MicroserviceClients;
+using Ozon.Route256.Five.OrderService.Services.Repository;
+using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 
 namespace Ozon.Route256.Five.OrderService.Configuration;
 
@@ -15,6 +17,8 @@ public static class ConfigureServices
         sc.AddSingleton<InMemoryStore>();
         sc.AddScoped<IRegionRepository, InMemoryRegionRepository>();
         sc.AddScoped<IOrderRepository, InMemoryOrderRepository>();
+        sc.AddScoped<IDateTimeProvider, DateTimeProvider>();
+        sc.AddScoped<ICachedCustomersClient, CachedCustomersClient>();
         
         return sc;
     }

@@ -1,19 +1,24 @@
 using Ozon.Route256.Five.OrderService;
 using Ozon.Route256.Five.OrderService.Configuration;
 using Ozon.Route256.Five.OrderService.Cqrs;
-using Ozon.Route256.Five.OrderService.GrpcServices;
-using Ozon.Route256.Five.OrderService.Repository;
+using Ozon.Route256.Five.OrderService.Services.GrpcServices;
+using Ozon.Route256.Five.OrderService.Services.Kafka;
+using Ozon.Route256.Five.OrderService.Services.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.WebHost.ConfigureKestrel(x => x.Configure(builder.Configuration));
 
 builder.Services.AddGrpc(options => { options.Interceptors.Add<LoggerInterceptor>(); });
-builder.Services.AddGrpcReflection();
-builder.Services.AddGrpcClients(builder.Configuration);
+builder.Services
+    .AddGrpcReflection()
+    .AddGrpcClients(builder.Configuration);
 
-builder.Services.AddCqrs();
-builder.Services.AddCoreServices();
+builder.Services
+    .AddCqrs()
+    .AddRedis(builder.Configuration)
+    .AddKafka(builder.Configuration)
+    .AddCoreServices();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -31,21 +36,4 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 app.MapGrpcService<OrdersGrpcService>();
 
-_ = DoWarmup(app.Lifetime.ApplicationStopping);
-
 app.Run();
-
-async Task DoWarmup(CancellationToken cancellationToken)
-{
-    try
-    {
-        app.Logger.LogInformation("Начинаем инициализацю inmemory хранилища...");
-        var store = app.Services.GetRequiredService<InMemoryStore>();
-        await store.FillData(cancellationToken);
-        app.Logger.LogInformation("Инициализаця inmemory хранилища законченна...");
-    }
-    catch (Exception e)
-    {
-        app.Logger.LogCritical(e, "Невозможно инициализировать данные для сервиса...");
-    }
-}

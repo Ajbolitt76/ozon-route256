@@ -13,6 +13,7 @@ services:
       "ConnectionStrings:SdServiceClientUrl": "http://service-discovery"
       "ConnectionStrings:LogisticsSimulatorServiceClientUrl": "http://logistics-simulator"
       "ConnectionStrings:CustomersClientUrl": "http://customer-service"
+      "ConnectionStrings:RedisConnection": "redis:6379"
     deploy:
       replicas: 2
     depends_on:
@@ -38,7 +39,7 @@ services:
     restart: unless-stopped
     environment:
       "ROUTE256_Redis:ConnectionString": "redis:6379,abortConnect=false"
-      "ROUTE256_Kafka:BootstrapServers": "kafka:29092"
+      "ROUTE256_Kafka:BootstrapServers": "kafka:9092"
     ports:
       - "8901:5080"
     depends_on:
@@ -47,6 +48,11 @@ services:
   orders-generator:
     image: gitlab-registry.ozon.dev/cs/classroom-5/teachers/five/orders-generator:latest
     restart: unless-stopped
+    environment:
+      "ROUTE256_CUSTOMER_SERVICE": "http://customer-service"
+      "ROUTE256_KAFKA_BROKERS": "kafka:9092"
+      "ROUTE256_ORDER_SOURCE": "WebSite"
+      "ROUTE256_ORDER_REQUEST_TOPIC": "pre_order"
     ports:
       - "8902:80"
     depends_on:
@@ -106,6 +112,8 @@ services:
       
   redis:
     image: redis:7
+    ports:
+      - "6379:6379"
         
   jaeger:
     restart: unless-stopped

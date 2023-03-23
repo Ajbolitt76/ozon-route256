@@ -1,4 +1,3 @@
-using Bogus;
 using FluentAssertions;
 using Grpc.Core;
 using Moq;
@@ -8,17 +7,16 @@ using Ozon.Route256.Five.OrderService.Exceptions;
 using Ozon.Route256.Five.OrderService.Features.GetOrdersForCustomer;
 using Ozon.Route256.Five.OrderService.Mappings;
 using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
-using Ozon.Route256.Five.OrderService.Repository.Abstractions;
+using Ozon.Route256.Five.OrderService.Services.MicroserviceClients;
+using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 using Ozon.Route256.Five.OrderService.UnitTests.CommonMocks;
 using Ozon.Route256.Five.OrderService.UnitTests.Extensions;
 using Ozon.Route256.Five.OrderService.UnitTests.Grpc;
 
 namespace Ozon.Route256.Five.OrderService.UnitTests.Features;
 
-public class GetOrdersForCustomerQueryHandlerTest
+public class GetOrdersForCustomerQueryHandlerTest : BaseUnitTest
 {
-    private readonly Faker _faker = new Faker();
-
     /// <summary>
     /// GetAllOrders должен возвращать данные, и делать запрос в cutomerService
     /// </summary>
@@ -33,6 +31,8 @@ public class GetOrdersForCustomerQueryHandlerTest
         };
 
         var customersMock = CustomerServiceMockHelper.WithGetCustomerData(customer);
+        var cachedClient = new CachedCustomersClient(customersMock.Object, PassthroughCache.Object);
+        
         var orderRepositoryMock = new Mock<IOrderRepository>();
         orderRepositoryMock.Setup(
                 x => x.GetAllForCustomer(
@@ -43,7 +43,9 @@ public class GetOrdersForCustomerQueryHandlerTest
                     It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<OrderAggregate>() { orderData });
 
-        var handler = new GetOrdersForCustomerQueryHandler(orderRepositoryMock.Object, customersMock.Object);
+        var handler = new GetOrdersForCustomerQueryHandler(
+            orderRepositoryMock.Object, 
+            cachedClient);
         var result = await handler.Handle(
             new GetOrdersForCustomerQuery(1, DateTime.Today, 1, 2),
             default);
@@ -89,7 +91,11 @@ public class GetOrdersForCustomerQueryHandlerTest
                     null!,
                     exception: new RpcException(new Status(StatusCode.NotFound, "Not found"))));
         
-        var handler = new GetOrdersForCustomerQueryHandler(orderRepositoryMock.Object, customersMock.Object);
+        var cachedClient = new CachedCustomersClient(customersMock.Object, PassthroughCache.Object);
+        
+        var handler = new GetOrdersForCustomerQueryHandler(
+            orderRepositoryMock.Object,
+            cachedClient);
         var result = await handler.Handle(
             new GetOrdersForCustomerQuery(1, DateTime.Today, 1, 2),
             default);

@@ -1,9 +1,9 @@
-using Ozon.Route256.Five.CustomersService.Grpc;
 using Ozon.Route256.Five.OrderService.Contracts.GetAllOrdersForCustomer;
 using Ozon.Route256.Five.OrderService.Cqrs;
 using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
-using Ozon.Route256.Five.OrderService.Exceptions.Grpc;
-using Ozon.Route256.Five.OrderService.Repository.Abstractions;
+using Ozon.Route256.Five.OrderService.Exceptions;
+using Ozon.Route256.Five.OrderService.Services.MicroserviceClients;
+using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 
 namespace Ozon.Route256.Five.OrderService.Features.GetOrdersForCustomer;
 
@@ -11,23 +11,21 @@ public class GetOrdersForCustomerQueryHandler
     : IQueryHandler<GetOrdersForCustomerQuery, GetAllOrdersForCustomerResponse>
 {
     private readonly IOrderRepository _orderRepository;
-    private readonly Customers.CustomersClient _customersClient;
+    private readonly ICachedCustomersClient _cachedCustomersClient;
 
-    public GetOrdersForCustomerQueryHandler(IOrderRepository orderRepository, Customers.CustomersClient customersClient)
+    public GetOrdersForCustomerQueryHandler(
+        IOrderRepository orderRepository,
+        ICachedCustomersClient cachedCustomersClient)
     {
         _orderRepository = orderRepository;
-        _customersClient = customersClient;
+        _cachedCustomersClient = cachedCustomersClient;
     }
 
     public async Task<HandlerResult<GetAllOrdersForCustomerResponse>> Handle(
         GetOrdersForCustomerQuery request,
         CancellationToken token)
     {
-        var clientInfoResult = await _customersClient.GetCustomerAsync(
-            new GetCustomerByIdRequest()
-            {
-                Id = request.ClientId
-            }, cancellationToken: token).ToHandlerResult();
+        var clientInfoResult = await _cachedCustomersClient.GetCustomerById(request.ClientId, token).ToHandlerResult();
 
         if (!clientInfoResult.Success)
             return HandlerResult<GetAllOrdersForCustomerResponse>.FromError(clientInfoResult.Error);

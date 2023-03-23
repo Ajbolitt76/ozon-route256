@@ -3,7 +3,7 @@ using Grpc.Core;
 using Ozon.Route256.Five.LogisticsSimulator.Grpc;
 using Ozon.Route256.Five.OrderService.Exceptions;
 using Ozon.Route256.Five.OrderService.Features.CancelOrder;
-using Ozon.Route256.Five.OrderService.Repository.Abstractions;
+using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 using Ozon.Route256.Five.OrderService.UnitTests.CommonMocks;
 using Ozon.Route256.Five.OrderService.UnitTests.Extensions;
 using Ozon.Route256.Five.OrderService.UnitTests.Grpc;

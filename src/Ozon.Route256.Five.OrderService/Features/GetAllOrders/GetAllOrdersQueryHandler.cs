@@ -1,9 +1,9 @@
-using Ozon.Route256.Five.CustomersService.Grpc;
 using Ozon.Route256.Five.OrderService.Contracts.GetOrders;
 using Ozon.Route256.Five.OrderService.Cqrs;
 using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
 using Ozon.Route256.Five.OrderService.Exceptions;
-using Ozon.Route256.Five.OrderService.Repository.Abstractions;
+using Ozon.Route256.Five.OrderService.Services.MicroserviceClients;
+using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 
 namespace Ozon.Route256.Five.OrderService.Features.GetAllOrders;
 
@@ -11,16 +11,16 @@ public class GetAllOrdersQueryHandler : IQueryHandler<GetAllOrdersQuery, GetOrde
 {
     private readonly IRegionRepository _regionRepository;
     private readonly IOrderRepository _orderRepository;
-    private readonly Customers.CustomersClient _customersClient;
+    private readonly ICachedCustomersClient _cachedCustomersClient;
 
     public GetAllOrdersQueryHandler(
         IRegionRepository regionRepository,
         IOrderRepository orderRepository,
-        Customers.CustomersClient customersClient)
+        ICachedCustomersClient cachedCustomersClient)
     {
         _regionRepository = regionRepository;
         _orderRepository = orderRepository;
-        _customersClient = customersClient;
+        _cachedCustomersClient = cachedCustomersClient;
     }
 
     public async Task<HandlerResult<GetOrdersResponse>> Handle(GetAllOrdersQuery request, CancellationToken token)
@@ -36,7 +36,7 @@ public class GetAllOrdersQueryHandler : IQueryHandler<GetAllOrdersQuery, GetOrde
                     new DomainException($"Unknown regions {string.Join(',', unknownRegions)}"));
         }
 
-        var customerData = (await _customersClient.GetCustomersAsync(new(), cancellationToken: token))
+        var customerData = (await _cachedCustomersClient.GetAllCustomers(token))
             .Customers
             .ToDictionary(x => x.Id, x => x);
 
