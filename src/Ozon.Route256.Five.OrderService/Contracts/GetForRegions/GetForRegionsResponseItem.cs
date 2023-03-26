@@ -12,5 +12,5 @@ public record GetForRegionsResponseItem(
     string Region, 
     int OrdersCount,
     int CustomersCount,
-    Decimal TotalPrice, 
+    decimal TotalPrice, 
     double TotalWeight);

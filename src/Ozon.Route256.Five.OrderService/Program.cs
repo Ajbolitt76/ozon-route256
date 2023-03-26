@@ -1,3 +1,4 @@
+using FluentMigrator.Runner;
 using Ozon.Route256.Five.OrderService;
 using Ozon.Route256.Five.OrderService.Configuration;
 using Ozon.Route256.Five.OrderService.Cqrs;
@@ -18,7 +19,7 @@ builder.Services
     .AddCqrs()
     .AddRedis(builder.Configuration)
     .AddKafka(builder.Configuration)
-    .AddCoreServices();
+    .AddCoreServices(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -36,4 +37,26 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 app.MapGrpcService<OrdersGrpcService>();
 
+await PerformMigrations();
+
 app.Run();
+
+async Task PerformMigrations()
+{
+    await using var scope = app!.Services.CreateAsyncScope();
+    var sp = scope.ServiceProvider;
+    var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger("Migrator");
+    var runner = sp.GetRequiredService<IMigrationRunner>();
+    
+    logger.LogInformation("Проводим миграции...");
+    try
+    {
+        runner.MigrateUp();
+    }
+    catch (Exception e)
+    {
+        logger.LogCritical("Не удалось провести миграции", e);
+        throw;
+    }
+
+} 
