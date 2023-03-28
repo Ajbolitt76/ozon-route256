@@ -23,8 +23,12 @@ public class UpdateOrderStatusCommandHandlerTest
             .Setup(x => x.GetOrderById(fakeOrder.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(fakeOrder);
 
-        repositoryMock.Setup(x => x.Upsert(It.IsAny<OrderAggregate>(), It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
+        repositoryMock.Setup(
+                x => x.UpdateStatus(
+                    It.IsAny<long>(),
+                    It.IsAny<OrderState>(),
+                    It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
 
         var handler = new UpdateOrderStatusCommandHandler(
             repositoryMock.Object,
@@ -36,7 +40,6 @@ public class UpdateOrderStatusCommandHandlerTest
         result.Should()
             .BeSuccessful();
 
-        var expectedAggregate = fakeOrder with { OrderState = OrderState.Delivered };
-        repositoryMock.Verify(x => x.Upsert(expectedAggregate, It.IsAny<CancellationToken>()));
+        repositoryMock.Verify(x => x.UpdateStatus(fakeOrder.Id, OrderState.Delivered, It.IsAny<CancellationToken>()));
     }
 }

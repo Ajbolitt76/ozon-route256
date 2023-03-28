@@ -20,7 +20,7 @@ public class DbOrderRepository : IOrderRepository
     public async Task<IReadOnlyList<OrderAggregate>> GetAllByRegions(
         IReadOnlyList<string>? regions,
         bool? isAscending,
-        int pageNumber, 
+        int pageNumber,
         int pageSize,
         CancellationToken cancellationToken)
     {
@@ -33,7 +33,7 @@ public class DbOrderRepository : IOrderRepository
             false => "ORDER BY \"Customer\" #>> '{\"Address\",\"Region\"}' DESC",
             _ => string.Empty
         };
-        
+
         var query = $"""
             SELECT "Id", "OrderState", "Customer", 
                    "Goods", "OrderedAt", "OrderType", 
@@ -45,12 +45,14 @@ public class DbOrderRepository : IOrderRepository
             OFFSET @Offset
         """;
 
-        var data = await connection.QueryAsync<DbPresentation>(query, new
-        {
-            Limit = pageSize,
-            Offset = (pageNumber - 1) * pageSize,
-            Regions = regions
-        });
+        var data = await connection.QueryAsync<DbPresentation>(
+            query,
+            new
+            {
+                Limit = pageSize,
+                Offset = (pageNumber - 1) * pageSize,
+                Regions = regions
+            });
         return data
             .Select(x => x.ToModel())
             .ToList();
@@ -78,7 +80,7 @@ public class DbOrderRepository : IOrderRepository
     }
 
     public async Task<IReadOnlyList<OrderAggregate>> GetAllForCustomer(
-        int customerId, 
+        int customerId,
         DateTime? startFrom,
         int pageNumber,
         int pageSize,
@@ -89,7 +91,7 @@ public class DbOrderRepository : IOrderRepository
         var dateFilter = startFrom.HasValue ? "\"OrderedAt\" > @StartFrom" : "TRUE";
 
         var query = $"""
-            SELECT "Id", "OrderState", "Customer", 
+            SELECT "Id", "OrderState", "Customer",
                    "Goods", "OrderedAt", "OrderType", 
                    "TotalPrice", "TotalWeight", "ItemsCount"
             FROM "Order"
@@ -97,7 +99,7 @@ public class DbOrderRepository : IOrderRepository
             LIMIT @Limit
             OFFSET @Offset
         """;
-        
+
         var data = await connection.QueryAsync<DbPresentation>(
             query,
             new
@@ -136,7 +138,7 @@ public class DbOrderRepository : IOrderRepository
             WHERE "Region" in @Regions AND "OrderedAt" > @StartFrom
             GROUP BY "Region"
         """;
-        
+
         var data = await connection.QueryAsync<GetForRegionsResponseItem>(
             query,
             new
@@ -148,22 +150,35 @@ public class DbOrderRepository : IOrderRepository
         return data.ToList();
     }
 
-    public async Task Upsert(OrderAggregate value, CancellationToken cancellationToken)
+    public async Task<bool> UpdateStatus(long id, OrderState state, CancellationToken cancellationToken)
     {
         var connection = await _connectionFactory.GetConnectionAsync();
-        
+
+        var query = """
+            UPDATE "Order"
+            SET "OrderState" = @OrderState
+            WHERE "Id" = @Id
+        """;
+
+        return await connection.ExecuteAsync(
+            query,
+            new
+            {
+                Id = id,
+                OrderState = state
+            }) == 1;
+    }
+
+    public async Task Insert(OrderAggregate value, CancellationToken cancellationToken)
+    {
+        var connection = await _connectionFactory.GetConnectionAsync();
+
         var query = """
             INSERT INTO "Order"("Id", "OrderState", "Customer", 
-                   "Goods", "OrderedAt", "OrderType", 
+                   "Goods", "PhoneNumber", "OrderedAt", "OrderType", 
                    "TotalPrice", "TotalWeight", "ItemsCount")
             VALUES (@Id, @OrderState, @Customer::jsonb, 
-                   @Goods::jsonb, @OrderedAt, @OrderType, 
-                   @TotalPrice, @TotalWeight, @ItemsCount)
-            ON CONFLICT ("Id") DO UPDATE
-            SET ("Id", "OrderState", "Customer", 
-                   "Goods", "OrderedAt", "OrderType", 
-                   "TotalPrice", "TotalWeight", "ItemsCount") = (@Id, @OrderState, @Customer::jsonb, 
-                   @Goods::jsonb, @OrderedAt, @OrderType, 
+                   @Goods::jsonb, @PhoneNumber, @OrderedAt, @OrderType, 
                    @TotalPrice, @TotalWeight, @ItemsCount)
         """;
 
@@ -175,6 +190,7 @@ public class DbOrderRepository : IOrderRepository
         OrderState OrderState,
         string Customer,
         string Goods,
+        string PhoneNumber,
         DateTime OrderedAt,
         OrderType OrderType,
         decimal TotalPrice,
@@ -185,7 +201,7 @@ public class DbOrderRepository : IOrderRepository
             => new(
                 Id,
                 OrderState,
-                JsonSerializer.Deserialize<CustomerDto>(Customer),
+                JsonSerializer.Deserialize<CustomerModel>(Customer),
                 JsonSerializer.Deserialize<List<OrderGood>>(Goods),
                 OrderedAt,
                 OrderType);
@@ -196,6 +212,7 @@ public class DbOrderRepository : IOrderRepository
                 aggregate.OrderState,
                 JsonSerializer.Serialize(aggregate.Customer),
                 JsonSerializer.Serialize(aggregate.Goods),
+                aggregate.Customer.PhoneNumber,
                 aggregate.OrderedAt,
                 aggregate.OrderType,
                 aggregate.TotalPrice,

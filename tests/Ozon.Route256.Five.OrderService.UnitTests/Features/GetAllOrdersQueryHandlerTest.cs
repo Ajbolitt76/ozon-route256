@@ -38,7 +38,7 @@ public class GetAllOrdersQueryHandlerTest : BaseUnitTest
 
         var orderData = FakeDataGenerators.ModelOrderAggregates.First() with
         {
-            Customer = new(customer.Id, customer.DefaultAddress.ToModel())
+            Customer = new(customer.Id, customer.MobileNumber, customer.DefaultAddress.ToModel())
         };
 
         var customersMock = CustomerServiceMockHelper.WithGetCustomersData(new[] { customer });

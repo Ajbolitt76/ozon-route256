@@ -15,16 +15,11 @@ public class InMemoryStore
         new("StPetersburg", new("StPetersburg", "StPetersburg", "ул. Софийская", "118", "", 59.814295, 30.478282)),
         new("Novosibirsk", new("Novosibirsk", "Novosibirsk", "3307 км", "16", "", 55.004917, 82.555067)),
     };
-
-    private readonly ConcurrentDictionary<long, OrderAggregate> _orders = new(2, 10);
-
+    
     public InMemoryStore(Customers.CustomersClient customersClient)
     {
         _customersClient = customersClient;
     }
 
     public IReadOnlyList<Region> Regions => _regionsList;
-
-    public ConcurrentDictionary<long, OrderAggregate> Orders => _orders;
-
 }

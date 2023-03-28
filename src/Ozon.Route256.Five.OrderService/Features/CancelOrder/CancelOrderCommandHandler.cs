@@ -39,7 +39,7 @@ public class CancelOrderCommandHandler : ICommandHandler<CancelOrderCommand>
         if (!serviceResult.Value.Success)
             return HandlerResult.FromError(new DomainException("LOGISTICS_ERROR", serviceResult.Value.Error));
 
-        await _orderRepository.Upsert(order with { OrderState = OrderState.Cancelled }, cancellationToken: token);
+        await _orderRepository.UpdateStatus(order.Id, OrderState.Cancelled, cancellationToken: token);
 
         return HandlerResult.Ok;
     }

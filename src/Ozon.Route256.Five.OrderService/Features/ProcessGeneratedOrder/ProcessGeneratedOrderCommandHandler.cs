@@ -1,3 +1,4 @@
+using Ozon.Route256.Five.CustomersService.Grpc;
 using Ozon.Route256.Five.OrderService.Contracts.KafkaMessages.NewOrder;
 using Ozon.Route256.Five.OrderService.Cqrs;
 using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
@@ -18,33 +19,47 @@ public class ProcessGeneratedOrderCommandHandler : ICommandHandler<ProcessGenera
     private readonly IRegionRepository _regionRepository;
     private readonly IMessageProducer<string, NewOrderMessage> _newOrderMessageProducer;
     private readonly IDateTimeProvider _dateTimeProvider;
+    private readonly Customers.CustomersClient _customersClient;
 
     public ProcessGeneratedOrderCommandHandler(
         ILogger<ProcessGeneratedOrderCommandHandler> logger,
         IOrderRepository orderRepository,
         IRegionRepository regionRepository, 
         IMessageProducer<string, NewOrderMessage> newOrderMessageProducer,
-        IDateTimeProvider dateTimeProvider)
+        IDateTimeProvider dateTimeProvider,
+        Customers.CustomersClient customersClient)
     {
         _logger = logger;
         _orderRepository = orderRepository;
         _regionRepository = regionRepository;
         _newOrderMessageProducer = newOrderMessageProducer;
         _dateTimeProvider = dateTimeProvider;
+        _customersClient = customersClient;
     }
 
     public async Task<HandlerResult> Handle(ProcessGeneratedOrderCommand request, CancellationToken token)
     {
+        var customerFromService = await _customersClient.GetCustomerAsync(new GetCustomerByIdRequest()
+        {
+            Id = request.Customer.Id
+        }, cancellationToken: token);
+
+        var customerModel = new CustomerModel(
+            request.Customer.Id,
+            customerFromService.MobileNumber,
+            request.Customer.Address
+        );
+
         var order = new OrderAggregate(
             request.Id,
             OrderState.Created,
-            request.Customer,
+            customerModel,
             request.Goods.ToList(),
             _dateTimeProvider.UtcNow,
             request.Source
         );
 
-        await _orderRepository.Upsert(order, token);
+        await _orderRepository.Insert(order, token);
         
         var warehouseAddress = await _regionRepository.GetRegionWarehouseAddress(request.Customer.Address.Region, token);
         if (warehouseAddress is null || !WarehouseInCloseDistance(request.Customer.Address, warehouseAddress))

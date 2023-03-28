@@ -1,4 +1,5 @@
 using Ozon.Route256.Five.OrderService.Contracts.GetForRegions;
+using Ozon.Route256.Five.OrderService.Model;
 using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
 
 namespace Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
@@ -27,5 +28,7 @@ public interface IOrderRepository
         DateTime startFrom,
         CancellationToken cancellationToken);
 
-    Task Upsert(OrderAggregate value, CancellationToken cancellationToken);
+    Task<bool> UpdateStatus(long id, OrderState state, CancellationToken cancellationToken);
+    
+    Task Insert(OrderAggregate value, CancellationToken cancellationToken);
 }

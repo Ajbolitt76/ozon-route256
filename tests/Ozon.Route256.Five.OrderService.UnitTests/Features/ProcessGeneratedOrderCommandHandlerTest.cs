@@ -2,6 +2,7 @@ using FluentAssertions;
 using Moq;
 using Ozon.Route256.Five.OrderService.Contracts.KafkaMessages.NewOrder;
 using Ozon.Route256.Five.OrderService.Features.ProcessGeneratedOrder;
+using Ozon.Route256.Five.OrderService.Mappings;
 using Ozon.Route256.Five.OrderService.Model;
 using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
 using Ozon.Route256.Five.OrderService.Services.Domain;
@@ -19,22 +20,22 @@ public class ProcessGeneratedOrderCommandHandlerTest : BaseUnitTest
     [Fact]
     public async Task Handle_ProcessGeneratedOrder_ShouldCreateOrderAndSendIfValid()
     {
-        var fakeAddress = FakeDataGenerators.ModelAddressDtos.First();
-        var fakeOrder = FakeDataGenerators.ModelOrderAggregates.First();
-
-        fakeOrder = fakeOrder with
+        var customerGrpcDto = FakeDataGenerators.CustomerServiceCustomerDtos.First();
+        var customerDto = new CustomerDto(customerGrpcDto.Id, customerGrpcDto.DefaultAddress.ToModel());
+        
+        var fakeOrder = FakeDataGenerators.ModelOrderAggregates.First() with
         {
             OrderState = OrderState.Created,
             OrderedAt = DateTime.UtcNow,
-            Customer = fakeOrder.Customer with
-            {
-                Address = fakeAddress
-            }
+            Customer = new CustomerModel(customerDto.Id, customerGrpcDto.MobileNumber, customerDto.Address)
         };
+        var fakeAddress = fakeOrder.Customer.Address;
 
+        var customersClientMock = CustomerServiceMockHelper.WithGetCustomerData(customerGrpcDto);
+        
         var orderRepositoryMock = new Mock<IOrderRepository>();
         orderRepositoryMock
-            .Setup(x => x.Upsert(It.IsAny<OrderAggregate>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Insert(It.IsAny<OrderAggregate>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         var regionRepositoryMock = new Mock<IRegionRepository>();
@@ -46,7 +47,7 @@ public class ProcessGeneratedOrderCommandHandlerTest : BaseUnitTest
         var command = new ProcessGeneratedOrderCommand(
             fakeOrder.Id,
             fakeOrder.OrderType,
-            fakeOrder.Customer,
+            customerDto,
             fakeOrder.Goods);
 
         var handler = new ProcessGeneratedOrderCommandHandler(
@@ -54,44 +55,49 @@ public class ProcessGeneratedOrderCommandHandlerTest : BaseUnitTest
             orderRepositoryMock.Object,
             regionRepositoryMock.Object,
             producerMock.Object,
-            new DateTimeProvider());
+            new DateTimeProvider(),
+            customersClientMock.Object);
         var result = await handler.Handle(command, default);
 
         result.Should().BeSuccessful();
         
-        orderRepositoryMock.Verify(x => x.Upsert(It.IsAny<OrderAggregate>(), It.IsAny<CancellationToken>()));
+        orderRepositoryMock.Verify(x => x.Insert(It.IsAny<OrderAggregate>(), It.IsAny<CancellationToken>()));
         producerMock.SentMessages.Should()
             .ContainSingle()
             .Which
             .Should().Be((fakeOrder.Id.ToString(), new NewOrderMessage(fakeOrder.Id)));
     }
     
-        /// <summary>
+    /// <summary>
     /// Обработчик, должен сохранить заказ и не отправить в логистику, если он не валиден
     /// </summary>
     [Fact]
     public async Task Handle_ProcessGeneratedOrder_ShouldCreateOrderIfNotValid()
     {
-        var fakeAddress = FakeDataGenerators.ModelAddressDtos.First();
-        var fakeOrder = FakeDataGenerators.ModelOrderAggregates.First();
-
-        fakeOrder = fakeOrder with
+        var customerGrpcDto = FakeDataGenerators.CustomerServiceCustomerDtos.First();
+        var customerDto = new CustomerDto(customerGrpcDto.Id, customerGrpcDto.DefaultAddress.ToModel());
+        
+        var fakeOrder = FakeDataGenerators.ModelOrderAggregates.First() with
         {
             OrderState = OrderState.Created,
             OrderedAt = DateTime.UtcNow,
-            Customer = fakeOrder.Customer with
-            {
-                Address = fakeAddress with
+            Customer = new CustomerModel(
+                customerDto.Id,
+                customerGrpcDto.MobileNumber,
+                customerDto.Address with
                 {
                     Longitude = 0,
                     Latitude = 0,
-                }
-            }
+                })
         };
+        
+        var fakeAddress = fakeOrder.Customer.Address;
+
+        var customersClientMock = CustomerServiceMockHelper.WithGetCustomerData(customerGrpcDto);
 
         var orderRepositoryMock = new Mock<IOrderRepository>();
         orderRepositoryMock
-            .Setup(x => x.Upsert(It.IsAny<OrderAggregate>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.Insert(It.IsAny<OrderAggregate>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         var regionRepositoryMock = new Mock<IRegionRepository>();
@@ -103,7 +109,7 @@ public class ProcessGeneratedOrderCommandHandlerTest : BaseUnitTest
         var command = new ProcessGeneratedOrderCommand(
             fakeOrder.Id,
             fakeOrder.OrderType,
-            fakeOrder.Customer,
+            customerDto,
             fakeOrder.Goods);
 
         var handler = new ProcessGeneratedOrderCommandHandler(
@@ -111,12 +117,13 @@ public class ProcessGeneratedOrderCommandHandlerTest : BaseUnitTest
             orderRepositoryMock.Object,
             regionRepositoryMock.Object,
             producerMock.Object,
-            new DateTimeProvider());
+            new DateTimeProvider(),
+            customersClientMock.Object);
         var result = await handler.Handle(command, default);
 
         result.Should().BeSuccessful();
         
-        orderRepositoryMock.Verify(x => x.Upsert(It.IsAny<OrderAggregate>(), It.IsAny<CancellationToken>()));
+        orderRepositoryMock.Verify(x => x.Insert(It.IsAny<OrderAggregate>(), It.IsAny<CancellationToken>()));
         producerMock.SentMessages.Should().BeEmpty();
     }
 }

@@ -9,6 +9,7 @@ public class InitialMigration : Migration
     {
         Create.Table("Order")
             .WithColumn("Id").AsInt64().PrimaryKey()
+            .WithColumn("PhoneNumber").AsString()
             .WithColumn("OrderState").AsInt32()
             .WithColumn("Customer").AsCustom("jsonb")
             .WithColumn("Goods").AsCustom("jsonb")

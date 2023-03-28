@@ -51,10 +51,13 @@ public static class FakeDataGenerators
                 })
             .GenerateForever();
     
-    public static IEnumerable<CustomerDto> ModelCustomerDtos { get; }
-        = new Faker<CustomerDto>("ru")
+    public static IEnumerable<CustomerModel> ModelCustomerDtos { get; }
+        = new Faker<CustomerModel>("ru")
             .CustomInstantiator(
-                f => new CustomerDto(f.Random.Number(Int32.MaxValue), ModelAddressDtos.First()))
+                f => new CustomerModel(
+                    f.Random.Number(Int32.MaxValue),
+                    f.Phone.PhoneNumber(),
+                    ModelAddressDtos.First()))
             .GenerateForever();
 
     public static IEnumerable<OrderGood> ModelOrderGoods { get; }

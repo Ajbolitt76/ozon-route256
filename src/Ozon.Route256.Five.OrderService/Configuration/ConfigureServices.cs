@@ -24,6 +24,11 @@ public static class ConfigureServices
                 .WithMigrationsIn(typeof(InitialMigration).Assembly)
             );
 
+        sc.AddScoped(x => 
+            new DatabaseConnectionString(
+                configuration.GetConnectionString("DbConnection")
+                ?? throw new InvalidOperationException("Не указанно подключение к БД")));
+
         sc.AddSingleton<InMemoryStore>();
         sc.AddScoped<IRegionRepository, InMemoryRegionRepository>();
         sc.AddScoped<IOrderRepository, DbOrderRepository>();

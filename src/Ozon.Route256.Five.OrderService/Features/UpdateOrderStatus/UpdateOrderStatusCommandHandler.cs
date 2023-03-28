@@ -18,20 +18,27 @@ public class UpdateOrderStatusCommandHandler : ICommandHandler<UpdateOrderStatus
         _orderRepository = orderRepository;
         _logger = logger;
     }
-    
+
     public async Task<HandlerResult> Handle(UpdateOrderStatusCommand request, CancellationToken token)
     {
-        var order = await _orderRepository.GetOrderById(request.OrderId, token);
+        var updateResult =
+            await _orderRepository.UpdateStatus(request.OrderId, request.NewState, token).ToHandlerResult();
 
-        if (order is null)
+        if (updateResult is { Success: false })
         {
-            _logger.LogWarning("Обновление заказа не удалось: заказ {Id} не найден", request.OrderId);
-            return HandlerResult.FromError(NotFoundException.WithStandardMessage<OrderAggregate>(request.OrderId.ToString()));
+            _logger.LogError("Обновление заказа не удалось: заказ {Id}", updateResult.Error);
+            return HandlerResult.FromError(updateResult.Error);
         }
 
-        var upResult = await _orderRepository.Upsert(order with { OrderState = request.NewState }, token).ToHandlerResult();
+        if (updateResult is { Value: false })
+        {
+            _logger.LogWarning("Обновление заказа не удалось: заказ {Id} не найден", request.OrderId);
+            return HandlerResult.FromError(
+                NotFoundException.WithStandardMessage<OrderAggregate>(request.OrderId.ToString()));
+        }
+
         _logger.LogWarning("Стаутс заказа {Id} обновлен на {NewStatus}", request.OrderId, request.NewState);
-        
-        return upResult;
+
+        return HandlerResult.Ok;
     }
 }
