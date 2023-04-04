@@ -20,7 +20,7 @@ public class SdConsumerHostedServiceTest
     {
         _testOutputHelper = testOutputHelper;
     }
-    
+
     /// <summary>
     /// Сообщения из открытого потока, должны обрабатывться и сохранятся в DbStore
     /// </summary>
@@ -53,7 +53,7 @@ public class SdConsumerHostedServiceTest
         {
             new()
             {
-                ClusterName = "clusterName",
+                ClusterName = "customers-cluster",
                 LastUpdated = Timestamp.FromDateTime(new DateTime(2022, 12, 2, 10, 23, 00, DateTimeKind.Utc)),
                 Replicas =
                 {
@@ -61,19 +61,21 @@ public class SdConsumerHostedServiceTest
                     {
                         Host = "testHost",
                         Port = 6000,
-                        Type = Replica.Types.ReplicaType.Async
+                        Type = Replica.Types.ReplicaType.Async,
+                        Buckets = { 1, 2, 3 }
                     },
                     new Replica()
                     {
                         Host = "localMost",
                         Port = 6100,
-                        Type = Replica.Types.ReplicaType.Sync
+                        Type = Replica.Types.ReplicaType.Sync,
+                        Buckets = { 4, 5, 6 }
                     }
                 }
             },
             new()
             {
-                ClusterName = "clusterName",
+                ClusterName = "clusterName2",
                 LastUpdated = Timestamp.FromDateTime(new DateTime(2022, 12, 2, 12, 23, 00, DateTimeKind.Utc)),
                 Replicas =
                 {
@@ -81,7 +83,8 @@ public class SdConsumerHostedServiceTest
                     {
                         Host = "kis",
                         Port = 6230,
-                        Type = Replica.Types.ReplicaType.Master
+                        Type = Replica.Types.ReplicaType.Master,
+                        Buckets = { 1, 2, 3 }
                     },
                 }
             }
@@ -96,7 +99,7 @@ public class SdConsumerHostedServiceTest
 
         await service.StopAsync(default);
 
-        // Проверяем, что DbSrtore.SetEndpointList вызван для каждого сообщения с корректными данными,
+        // Проверяем, что DbStore.SetEndpointList вызван для каждого сообщения с корректными данными,
         savedCallsHistory
             .Should()
             .SatisfyRespectively(batches.Select(CreateDbCheckerForDbResourcesResponse));
@@ -156,7 +159,7 @@ public class SdConsumerHostedServiceTest
     {
         var dbEndpoints = response
             .Replicas
-            .Select(x => new DbEndpoint($"{x.Host}:{x.Port}", x.Type.ToModel()))
+            .Select(x => new DbEndpoint($"{x.Host}:{x.Port}", x.Type.ToModel(), x.Buckets.ToArray()))
             .ToArray();
 
         return (entry) => entry.Should().Equal(dbEndpoints);

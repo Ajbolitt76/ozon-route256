@@ -1,7 +1,8 @@
-using FluentMigrator.Runner;
 using Ozon.Route256.Five.OrderService;
 using Ozon.Route256.Five.OrderService.Configuration;
 using Ozon.Route256.Five.OrderService.Cqrs;
+using Ozon.Route256.Five.OrderService.Services.Database;
+using Ozon.Route256.Five.OrderService.Services.Database.Migrator;
 using Ozon.Route256.Five.OrderService.Services.GrpcServices;
 using Ozon.Route256.Five.OrderService.Services.Kafka;
 using Ozon.Route256.Five.OrderService.Services.Redis;
@@ -19,6 +20,7 @@ builder.Services
     .AddCqrs()
     .AddRedis(builder.Configuration)
     .AddKafka(builder.Configuration)
+    .AddDatabase(builder.Configuration)
     .AddCoreServices(builder.Configuration);
 
 builder.Services.AddControllers();
@@ -46,12 +48,12 @@ async Task PerformMigrations()
     await using var scope = app!.Services.CreateAsyncScope();
     var sp = scope.ServiceProvider;
     var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger("Migrator");
-    var runner = sp.GetRequiredService<IMigrationRunner>();
+    var runner = sp.GetRequiredService<InServiceShardedMigrator>();
     
     logger.LogInformation("Проводим миграции...");
     try
     {
-        runner.MigrateUp();
+        await runner.Migrate();
     }
     catch (Exception e)
     {

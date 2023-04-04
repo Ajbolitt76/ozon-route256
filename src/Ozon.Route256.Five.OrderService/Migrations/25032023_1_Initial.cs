@@ -1,13 +1,20 @@
 using FluentMigrator;
+using Microsoft.Extensions.Options;
+using Ozon.Route256.Five.OrderService.Services.Database.Migrator;
 
 namespace Ozon.Route256.Five.OrderService.Migrations;
 
-[Migration(25032023_1)]
-public class InitialMigration : Migration
+[Migration(25032023_1_2)]
+public class InitialMigration : BucketedMigration
 {
-    public override void Up()
+    public InitialMigration(IOptions<MigratorConfiguration> migratorConfiguration) : base(migratorConfiguration)
+    {
+    }
+    
+    protected override void UpBucketed(string bucketSchema)
     {
         Create.Table("Order")
+            .InSchema(bucketSchema)
             .WithColumn("Id").AsInt64().PrimaryKey()
             .WithColumn("PhoneNumber").AsString()
             .WithColumn("OrderState").AsInt32()
@@ -20,8 +27,8 @@ public class InitialMigration : Migration
             .WithColumn("ItemsCount").AsInt32();
     }
 
-    public override void Down()
+    protected override void DownBucketed(string bucketSchema)
     {
-        Delete.Table("Order");
+        Delete.Table("Order").InSchema(bucketSchema);
     }
 }

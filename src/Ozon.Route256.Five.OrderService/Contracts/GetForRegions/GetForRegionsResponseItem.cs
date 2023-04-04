@@ -10,7 +10,7 @@ namespace Ozon.Route256.Five.OrderService.Contracts.GetForRegions;
 /// <param name="TotalWeight">Суммарный вес</param>
 public record GetForRegionsResponseItem(
     string Region, 
-    int OrdersCount,
-    int CustomersCount,
+    long OrdersCount,
+    long CustomersCount,
     decimal TotalPrice, 
     double TotalWeight);

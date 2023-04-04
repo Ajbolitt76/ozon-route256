@@ -4,7 +4,6 @@ using Ozon.Route256.Five.OrderService.Cqrs;
 using Ozon.Route256.Five.OrderService.Cqrs.ResultTypes;
 using Ozon.Route256.Five.OrderService.Exceptions;
 using Ozon.Route256.Five.OrderService.Services.MicroserviceClients;
-using Ozon.Route256.Five.OrderService.Services.Redis;
 using Ozon.Route256.Five.OrderService.Services.Repository.Abstractions;
 
 namespace Ozon.Route256.Five.OrderService.Features.GetOrderById;

@@ -30,10 +30,10 @@ public class SdConsumerHostedService : BackgroundService
                 using var stream = _client.DbResources(
                     new DbResourcesRequest
                     {
-                        ClusterName = "cluster"
+                        ClusterName = "orders-cluster"
                     },
                     cancellationToken: stoppingToken);
-                
+
                 while (await stream.ResponseStream.MoveNext(stoppingToken))
                 {
                     _logger.LogDebug(
@@ -41,13 +41,13 @@ public class SdConsumerHostedService : BackgroundService
                         stream.ResponseStream.Current.LastUpdated.ToDateTime());
                     var response = stream.ResponseStream.Current;
 
-                    var endpoints = new List<DbEndpoint>(response.Replicas.Capacity);
-
-                    foreach (var replica in response.Replicas)
-                    {
-                        var endpoint = new DbEndpoint($"{replica.Host}:{replica.Port}", replica.Type.ToModel());
-                        endpoints.Add(endpoint);
-                    }
+                    var endpoints = response.Replicas
+                        .Select(
+                            x => new DbEndpoint(
+                                $"{x.Host}:{x.Port}",
+                                x.Type.ToModel(),
+                                x.Buckets.ToArray()))
+                        .ToList();
 
                     await _dbStore.SetEndpointList(endpoints);
                 }

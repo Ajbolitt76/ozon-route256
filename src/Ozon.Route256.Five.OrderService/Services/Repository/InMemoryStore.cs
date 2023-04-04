@@ -1,7 +1,5 @@
-using System.Collections.Concurrent;
 using Ozon.Route256.Five.CustomersService.Grpc;
 using Ozon.Route256.Five.OrderService.Model;
-using Ozon.Route256.Five.OrderService.Model.OrderAggregate;
 
 namespace Ozon.Route256.Five.OrderService.Services.Repository;
 

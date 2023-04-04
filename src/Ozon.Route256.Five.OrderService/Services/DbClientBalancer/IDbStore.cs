@@ -2,7 +2,11 @@ namespace Ozon.Route256.Five.OrderService.Services.DbClientBalancer;
 
 public interface IDbStore
 {
+    int BucketCount { get; }
+    
+    int[] BucketList { get; }
+    
     Task SetEndpointList(IReadOnlyCollection<DbEndpoint> endpoints);
 
-    Task<DbEndpoint> GetNextDbEndpointAsync();
+    Task<DbEndpoint?> GetForBucketAsync(int bucketId, CancellationToken cancellationToken);
 }

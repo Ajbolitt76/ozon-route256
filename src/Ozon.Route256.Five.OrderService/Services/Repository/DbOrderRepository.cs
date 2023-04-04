@@ -10,12 +10,92 @@ namespace Ozon.Route256.Five.OrderService.Services.Repository;
 
 public class DbOrderRepository : IOrderRepository
 {
-    private readonly IConnectionFactory _connectionFactory;
+    private readonly ISharder _sharder;
+    private readonly IRegionRepository _regionRepository;
+    private readonly IShardedConnectionFactory _shardedConnectionFactory;
 
-    public DbOrderRepository(IConnectionFactory connectionFactory)
+    public DbOrderRepository(
+        ISharder sharder,
+        IRegionRepository regionRepository,
+        IShardedConnectionFactory shardedConnectionFactory)
     {
-        _connectionFactory = connectionFactory;
+        _sharder = sharder;
+        _regionRepository = regionRepository;
+        _shardedConnectionFactory = shardedConnectionFactory;
     }
+
+    /// <summary>
+    ///  Получить пагинацию по индексу
+    /// </summary>
+    /// <param name="bucketData">ИД бакетов + доп параметры для запроса</param>
+    /// <param name="sql">
+    ///     SQL запроса.
+    ///     <br></br>
+    ///     Должен состоять из 2 запросов: количество строк удовлетворяющих фильтру и запрос ID с фильтром
+    ///     <br></br>
+    ///     В запрос пробросятся значени доп параметров для бакета, @Limit, @Offset
+    /// </param>
+    /// <param name="pageNumber">Номер страницы</param>
+    /// <param name="pageSize">Размер страницы</param>
+    /// <param name="cancellationToken">cancellationToken</param>
+    /// <returns>Список ID для получения</returns>
+    private async Task<List<long>> GetPaginatedIdsToFetch(
+        IEnumerable<(int BucketId, IDictionary<string, object> AdditionalParameters)> bucketData,
+        string sql,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var dataLeftToFetch = pageSize;
+        var offsetLeft = (pageNumber - 1) * pageSize;
+        var idsToFetch = new List<long>(pageSize);
+
+        foreach (var (bucketId, additionalParametrs) in bucketData)
+        {
+            if (dataLeftToFetch <= 0)
+                break;
+
+            await using var indexConnection =
+                await _shardedConnectionFactory.GetConnectionByBucketIdAsync(bucketId, cancellationToken);
+
+            var parameters = new Dictionary<string, object>()
+            {
+                ["Limit"] = dataLeftToFetch,
+                ["Offset"] = offsetLeft
+            };
+
+            foreach (var parameter in additionalParametrs)
+                parameters.Add(parameter.Key, parameter.Value);
+
+            var indexData = await indexConnection.QueryMultipleAsync(sql, parameters);
+            var countInBucket = await indexData.ReadFirstAsync<int>();
+            var ids = (await indexData.ReadAsync<long>()).ToList();
+
+            idsToFetch.AddRange(ids);
+            // L = L - ReturnedCount
+            dataLeftToFetch = pageSize - idsToFetch.Count;
+            // O = O - (Count - ReturnedCount)
+            offsetLeft -= (countInBucket - idsToFetch.Count);
+        }
+
+        return idsToFetch;
+    }
+
+    private List<(int BucketId, List<T> Ids)> GetBucketedIds<T>(IEnumerable<T> ids)
+        => ids
+            .GroupBy(x => _sharder.GetBucketId(x), x => x)
+            .Select(x => (BucketId: x.Key, Ids: x.ToList()))
+            .ToList();
+
+    private IOrderedEnumerable<T>? ApplySorting<T, TS>(IEnumerable<T> toSort, bool? isAscending, Func<T, TS> getField)
+        => isAscending switch
+        {
+            true => toSort
+                .OrderBy(getField),
+            false => toSort
+                .OrderByDescending(getField),
+            _ => null
+        };
 
     public async Task<IReadOnlyList<OrderAggregate>> GetAllByRegions(
         IReadOnlyList<string>? regions,
@@ -24,48 +104,43 @@ public class DbOrderRepository : IOrderRepository
         int pageSize,
         CancellationToken cancellationToken)
     {
-        var connection = await _connectionFactory.GetConnectionAsync();
+        if (regions is null || regions.Count == 0)
+            regions = await _regionRepository.GetAllRegions(cancellationToken);
 
-        var regionsFilter = regions != null ? "\"Customer\" #>> '{\"Address\",\"Region\"}' = ANY(@Regions)" : "TRUE";
-        var ordering = isAscending switch
-        {
-            true => "ORDER BY \"Customer\" #>> '{\"Address\",\"Region\"}' ASC",
-            false => "ORDER BY \"Customer\" #>> '{\"Address\",\"Region\"}' DESC",
-            _ => string.Empty
-        };
+        regions = ApplySorting(regions, isAscending, x => x)?.ToList() ?? regions;
 
-        var query = $"""
-            SELECT "Id", "OrderState", "Customer", 
-                   "Goods", "OrderedAt", "OrderType", 
-                   "TotalPrice", "TotalWeight", "ItemsCount"
-            FROM "Order"
-            WHERE {regionsFilter}
-            {ordering}
-            LIMIT @Limit
-            OFFSET @Offset
-        """;
+        var idsToFetch = await GetPaginatedIdsToFetch(
+            regions.Select(
+                x => (_sharder.GetBucketId(x),
+                    (IDictionary<string, object>)new Dictionary<string, object>() { ["Region"] = x })),
+            """
+                SELECT count(*) FROM __bucket__.index_region_order WHERE region = @Region;
 
-        var data = await connection.QueryAsync<DbPresentation>(
-            query,
-            new
-            {
-                Limit = pageSize,
-                Offset = (pageNumber - 1) * pageSize,
-                Regions = regions
-            });
-        return data
-            .Select(x => x.ToModel())
-            .ToList();
+                SELECT order_id FROM __bucket__.index_region_order 
+                WHERE region = @Region
+                ORDER BY order_id
+                LIMIT @Limit
+                OFFSET @Offset;
+            """,
+            pageNumber,
+            pageSize,
+            cancellationToken);
+
+        var orders = await GetByIdsAsync(idsToFetch, cancellationToken);
+
+        return ApplySorting(orders, isAscending, x => x.Customer.Address.Region)
+            ?.ThenBy(x => x.Id)
+            .ToList() ?? orders;
     }
 
     public async Task<OrderAggregate?> GetOrderById(long id, CancellationToken cancellationToken)
     {
-        var connection = await _connectionFactory.GetConnectionAsync();
+        await using var connection = await _shardedConnectionFactory.GetConnectionByKeyAsync(id, cancellationToken);
         var query = $"""
             SELECT "Id", "OrderState", "Customer", 
-                   "Goods", "OrderedAt", "OrderType", 
+                   "Goods", "PhoneNumber", "OrderedAt", "OrderType", 
                    "TotalPrice", "TotalWeight", "ItemsCount"
-            FROM "Order"
+            FROM __bucket__."Order"
             WHERE "Id" = @Id
         """;
 
@@ -86,31 +161,31 @@ public class DbOrderRepository : IOrderRepository
         int pageSize,
         CancellationToken cancellationToken)
     {
-        var connection = await _connectionFactory.GetConnectionAsync();
+        await using var connection =
+            await _shardedConnectionFactory.GetConnectionByKeyAsync(customerId, cancellationToken);
 
-        var dateFilter = startFrom.HasValue ? "\"OrderedAt\" > @StartFrom" : "TRUE";
-
-        var query = $"""
-            SELECT "Id", "OrderState", "Customer",
-                   "Goods", "OrderedAt", "OrderType", 
-                   "TotalPrice", "TotalWeight", "ItemsCount"
-            FROM "Order"
-            WHERE "Customer" ->> 'Id' = @Id::text AND {dateFilter}
-            LIMIT @Limit
-            OFFSET @Offset
-        """;
-
-        var data = await connection.QueryAsync<DbPresentation>(
-            query,
-            new
+        var idsToFetch = await GetPaginatedIdsToFetch(
+            new[]
             {
-                Id = customerId,
-                Limit = pageSize,
-                StartFrom = startFrom,
-                Offset = (pageNumber - 1) * pageSize
-            });
+                (_sharder.GetBucketId(customerId),
+                    (IDictionary<string, object>)new Dictionary<string, object>() { ["CustomerId"] = customerId })
+            },
+            """
+                SELECT count(*) FROM __bucket__.index_customer_order WHERE customer_id = @CustomerId;
 
-        return data.Select(x => x.ToModel()).ToList();
+                SELECT order_id FROM __bucket__.index_customer_order 
+                WHERE customer_id = @CustomerId;
+                ORDER BY order_date
+                LIMIT @Limit
+                OFFSET @Offset;
+            """,
+            pageNumber,
+            pageSize,
+            cancellationToken);
+
+        var orders = await GetByIdsAsync(idsToFetch, cancellationToken);
+
+        return orders;
     }
 
     public async Task<IReadOnlyList<GetForRegionsResponseItem>> GetForRegions(
@@ -118,8 +193,7 @@ public class DbOrderRepository : IOrderRepository
         DateTime startFrom,
         CancellationToken cancellationToken)
     {
-        var connection = await _connectionFactory.GetConnectionAsync();
-
+        // Это OLAP, так-что тут можно выбирать из JSONB 
         // language=sql
         var query = """
             WITH preparedOrders as
@@ -127,35 +201,54 @@ public class DbOrderRepository : IOrderRepository
                              "Customer" ->> 'Id'                    as "CustomerId",
                              "TotalPrice",
                              "TotalWeight",
-                             "OrderedAt"
-                      FROM "Order")
+                             "OrderedAt"  
+                      FROM __bucket__."Order")
             SELECT "Region",
-                   sum("TotalPrice") as "TotalPrice",
-                   sum("TotalWeight") as "TotalWeight",
+                   count(*) as "OrdersCount",
                    count(distinct "CustomerId") as "CustomersCount",
-                   count(*) as "OrdersCount"
+                   sum("TotalPrice") as "TotalPrice",
+                   sum("TotalWeight") as "TotalWeight"
             FROM preparedOrders
-            WHERE "Region" in @Regions AND "OrderedAt" > @StartFrom
+            WHERE "Region" = ANY(@Regions) AND "OrderedAt" > @StartFrom
             GROUP BY "Region"
         """;
 
-        var data = await connection.QueryAsync<GetForRegionsResponseItem>(
-            query,
-            new
-            {
-                Regions = regions,
-                StartFrom = startFrom
-            });
+        var result = new List<GetForRegionsResponseItem>();
 
-        return data.ToList();
+        foreach (var bucketId in _sharder.GetAllBucketIds())
+        {
+            await using var connection =
+                await _shardedConnectionFactory.GetConnectionByBucketIdAsync(bucketId, cancellationToken);
+
+            var data = await connection.QueryAsync<GetForRegionsResponseItem>(
+                query,
+                new
+                {
+                    Regions = regions,
+                    StartFrom = startFrom
+                });
+            
+            result.AddRange(data);
+        }
+
+
+        return result.GroupBy(x => x.Region)
+            .Select(
+                g => new GetForRegionsResponseItem(
+                    g.Key,
+                    g.Select(x => x.OrdersCount).Sum(),
+                    g.Select(x => x.CustomersCount).Sum(),
+                    g.Select(x => x.TotalPrice).Sum(),
+                    g.Select(x => x.TotalWeight).Sum()))
+            .ToList();
     }
 
     public async Task<bool> UpdateStatus(long id, OrderState state, CancellationToken cancellationToken)
     {
-        var connection = await _connectionFactory.GetConnectionAsync();
+        await using var connection = await _shardedConnectionFactory.GetConnectionByKeyAsync(id, cancellationToken);
 
         var query = """
-            UPDATE "Order"
+            UPDATE __bucket__."Order"
             SET "OrderState" = @OrderState
             WHERE "Id" = @Id
         """;
@@ -171,10 +264,11 @@ public class DbOrderRepository : IOrderRepository
 
     public async Task Insert(OrderAggregate value, CancellationToken cancellationToken)
     {
-        var connection = await _connectionFactory.GetConnectionAsync();
+        await using var connection =
+            await _shardedConnectionFactory.GetConnectionByKeyAsync(value.Id, cancellationToken);
 
         var query = """
-            INSERT INTO "Order"("Id", "OrderState", "Customer", 
+            INSERT INTO __bucket__."Order"("Id", "OrderState", "Customer", 
                    "Goods", "PhoneNumber", "OrderedAt", "OrderType", 
                    "TotalPrice", "TotalWeight", "ItemsCount")
             VALUES (@Id, @OrderState, @Customer::jsonb, 
@@ -183,6 +277,83 @@ public class DbOrderRepository : IOrderRepository
         """;
 
         await connection.ExecuteAsync(query, DbPresentation.FromModel(value));
+        await UpsertIndexes(value, cancellationToken);
+    }
+
+    private async Task UpsertIndexes(OrderAggregate value, CancellationToken cancellationToken)
+    {
+        await using var connectionToRegionIndex = await _shardedConnectionFactory.GetConnectionByKeyAsync(
+            value.Customer.Address.Region,
+            cancellationToken);
+
+        await using var connectionToCustomerIndex = await _shardedConnectionFactory.GetConnectionByKeyAsync(
+            value.Customer.Id,
+            cancellationToken);
+
+        var upsertRegionIndex = """
+            INSERT INTO __bucket__.index_region_order(order_id, region)
+            VALUES (@OrderId, @Region)
+            ON CONFLICT (order_id) DO UPDATE SET
+                region = @Region
+        """;
+
+        var upsertCustomerIndex = """
+            INSERT INTO __bucket__.index_customer_order(order_id, customer_id, order_date)
+            VALUES (@OrderId, @CustomerId, @OrderedAt)
+            ON CONFLICT (order_id) DO UPDATE SET
+                customer_id = @CustomerId,
+                order_date = @OrderedAt
+        """;
+
+        await connectionToRegionIndex.ExecuteAsync(
+            upsertRegionIndex,
+            new
+            {
+                OrderId = value.Id,
+                Region = value.Customer.Address.Region
+            });
+
+        await connectionToCustomerIndex.ExecuteAsync(
+            upsertCustomerIndex,
+            new
+            {
+                OrderId = value.Id,
+                CustomerId = value.Customer.Id,
+                value.OrderedAt
+            });
+    }
+
+    private async Task<List<OrderAggregate>> GetByIdsAsync(IEnumerable<long> idsToFetch,
+        CancellationToken cancellationToken)
+    {
+        var bucketAndOrderIds = GetBucketedIds(idsToFetch);
+
+        var result = new List<OrderAggregate>(idsToFetch.Count());
+
+        foreach (var (bucketId, ids) in bucketAndOrderIds)
+        {
+            await using var connection =
+                await _shardedConnectionFactory.GetConnectionByBucketIdAsync(bucketId, cancellationToken);
+
+            var query = $"""
+                SELECT "Id", "OrderState", "Customer", 
+                       "Goods", "PhoneNumber", "OrderedAt", "OrderType", 
+                       "TotalPrice", "TotalWeight", "ItemsCount"
+                FROM __bucket__."Order"
+                WHERE "Id" = ANY(@OrderIds)
+            """;
+
+            var data = await connection.QueryAsync<DbPresentation>(
+                query,
+                new
+                {
+                    OrderIds = ids
+                });
+
+            result.AddRange(data.Select(x => x.ToModel()));
+        }
+
+        return result;
     }
 
     private record DbPresentation(

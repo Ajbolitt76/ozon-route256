@@ -65,15 +65,16 @@ services:
       - "8903:80"
     restart: unless-stopped
     environment:
-      - ROUTE256_DB_STATE=cluster:0-9:db1:1543;cluster:10-19:db2:1543;cluster1:0:db3:1543
+      - ROUTE256_DB_STATE=customers-cluster:0-3:localhost:8881;orders-cluster:0-3:localhost:8883;orders-cluster:4-7:localhost:8884;cluster:0-9:db1:1543;
       - ROUTE256_UPDATE_TIMEOUT=10
 
-  
   orders-database:
     image: postgres:15.2-alpine
+    deploy:
+      replicas: 2
     restart: unless-stopped
     ports:
-      - "8880:5432"
+      - "8883-8884:5432"
     environment:
       POSTGRES_PASSWORD: fd2ee12swq
       POSTGRES_DB: orders
