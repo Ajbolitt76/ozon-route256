@@ -31,7 +31,7 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger(); 
+    app.UseSwagger();
     app.UseSwaggerUI();
     app.MapGrpcReflectionService();
 }
@@ -45,20 +45,27 @@ app.Run();
 
 async Task PerformMigrations()
 {
+    var cts = new CancellationTokenSource();
+    Console.CancelKeyPress += (s, e) =>
+    {
+        cts.Cancel();
+        e.Cancel = true;
+    };
+
     await using var scope = app!.Services.CreateAsyncScope();
     var sp = scope.ServiceProvider;
     var logger = sp.GetRequiredService<ILoggerFactory>().CreateLogger("Migrator");
     var runner = sp.GetRequiredService<InServiceShardedMigrator>();
-    
+
     logger.LogInformation("Проводим миграции...");
+
     try
     {
-        await runner.Migrate();
+        await runner.Migrate(cts.Token);
     }
     catch (Exception e)
     {
         logger.LogCritical("Не удалось провести миграции", e);
         throw;
     }
-
-} 
+}

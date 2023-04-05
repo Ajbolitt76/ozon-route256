@@ -20,9 +20,9 @@ public class InServiceShardedMigrator
         _shardingOptions = shardingOptions.Value;
     }
 
-    public async Task Migrate()
+    public async Task Migrate(CancellationToken cancellationToken)
     {
-        var endpoints = await GetEndpoints();
+        var endpoints = await GetEndpoints(cancellationToken);
 
         foreach (var info in endpoints)
         {
@@ -36,10 +36,8 @@ public class InServiceShardedMigrator
                         .ToArray();
                 });
 
-            using (var scope = serviceProvider.CreateScope())
-            {
-                UpdateDatabase(serviceProvider);
-            }
+            using var scope = serviceProvider.CreateScope();
+            UpdateDatabase(scope.ServiceProvider);
         }
     }
 
@@ -67,15 +65,14 @@ public class InServiceShardedMigrator
     private string CreateConnectionString(DbEndpoint info)
         => _shardingOptions.GetConnectionString(info.HostPort);
 
-    private async Task<DbEndpoint[]> GetEndpoints()
+    private async Task<DbEndpoint[]> GetEndpoints(CancellationToken cancellationToken)
     {
         // wait for sd
-        var token = CancellationToken.None;
         using var stream = _client.DbResources(
             new DbResourcesRequest { ClusterName = "orders-cluster" },
-            cancellationToken: token);
+            cancellationToken: cancellationToken);
 
-        await stream.ResponseStream.MoveNext(CancellationToken.None);
+        await stream.ResponseStream.MoveNext(cancellationToken);
         var response = stream.ResponseStream.Current;
 
         return response.Replicas

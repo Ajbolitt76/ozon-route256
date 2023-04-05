@@ -9,7 +9,7 @@ public class DbStore : IDbStore
 
     public int BucketCount => _bucketEndpointMap.Count;
 
-    public int[] BucketList => _bucketEndpointMap.Keys.ToArray();
+    public IReadOnlyCollection<int> BucketList => _bucketEndpointMap.Keys;
 
     public Task SetEndpointList(IReadOnlyCollection<DbEndpoint> newEndpoints)
     {

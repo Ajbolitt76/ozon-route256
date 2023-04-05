@@ -4,5 +4,5 @@ public interface ISharder
 {
     public int GetBucketId<T>(T key);
 
-    public int[] GetAllBucketIds();
+    public IReadOnlyCollection<int> GetAllBucketIds();
 }

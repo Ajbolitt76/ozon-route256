@@ -4,7 +4,7 @@ public interface IDbStore
 {
     int BucketCount { get; }
     
-    int[] BucketList { get; }
+    IReadOnlyCollection<int> BucketList { get; }
     
     Task SetEndpointList(IReadOnlyCollection<DbEndpoint> endpoints);
 

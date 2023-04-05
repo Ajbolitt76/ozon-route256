@@ -24,6 +24,6 @@ public class Sharder : ISharder
         return bucketGetter.GetShardIndex(key, _dbStore.BucketCount);
     }
 
-    public int[] GetAllBucketIds()
+    public IReadOnlyCollection<int> GetAllBucketIds()
         => _dbStore.BucketList;
 }

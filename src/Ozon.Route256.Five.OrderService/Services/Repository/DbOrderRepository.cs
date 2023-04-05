@@ -193,22 +193,14 @@ public class DbOrderRepository : IOrderRepository
         DateTime startFrom,
         CancellationToken cancellationToken)
     {
-        // Это OLAP, так-что тут можно выбирать из JSONB 
         // language=sql
         var query = """
-            WITH preparedOrders as
-                     (SELECT "Customer" #>> '{"Address", "Region"}' as "Region",
-                             "Customer" ->> 'Id'                    as "CustomerId",
-                             "TotalPrice",
-                             "TotalWeight",
-                             "OrderedAt"  
-                      FROM __bucket__."Order")
             SELECT "Region",
                    count(*) as "OrdersCount",
                    count(distinct "CustomerId") as "CustomersCount",
                    sum("TotalPrice") as "TotalPrice",
                    sum("TotalWeight") as "TotalWeight"
-            FROM preparedOrders
+            FROM __bucket__."Order"
             WHERE "Region" = ANY(@Regions) AND "OrderedAt" > @StartFrom
             GROUP BY "Region"
         """;
@@ -270,10 +262,12 @@ public class DbOrderRepository : IOrderRepository
         var query = """
             INSERT INTO __bucket__."Order"("Id", "OrderState", "Customer", 
                    "Goods", "PhoneNumber", "OrderedAt", "OrderType", 
-                   "TotalPrice", "TotalWeight", "ItemsCount")
+                   "TotalPrice", "TotalWeight", "ItemsCount",
+                   "CustomerId", "Region")
             VALUES (@Id, @OrderState, @Customer::jsonb, 
                    @Goods::jsonb, @PhoneNumber, @OrderedAt, @OrderType, 
-                   @TotalPrice, @TotalWeight, @ItemsCount)
+                   @TotalPrice, @TotalWeight, @ItemsCount,
+                   @CustomerId, @Region )
         """;
 
         await connection.ExecuteAsync(query, DbPresentation.FromModel(value));
@@ -356,18 +350,32 @@ public class DbOrderRepository : IOrderRepository
         return result;
     }
 
-    private record DbPresentation(
-        long Id,
-        OrderState OrderState,
-        string Customer,
-        string Goods,
-        string PhoneNumber,
-        DateTime OrderedAt,
-        OrderType OrderType,
-        decimal TotalPrice,
-        double TotalWeight,
-        int ItemsCount)
+    private class DbPresentation
     {
+        public long Id { get; set; }
+        
+        public OrderState OrderState { get; set; }
+        
+        public string Customer { get; set; }
+        
+        public string Goods{ get; set; }
+        
+        public string PhoneNumber { get; set; }
+        
+        public DateTime OrderedAt { get; set; }
+        
+        public OrderType OrderType { get; set; }
+        
+        public decimal TotalPrice { get; set; }
+        
+        public double TotalWeight { get; set; }
+        
+        public int CustomerId { get; set; }
+
+        public int ItemsCount { get; set; }
+        
+        public string Region { get; set; }
+        
         public OrderAggregate ToModel()
             => new(
                 Id,
@@ -378,16 +386,20 @@ public class DbOrderRepository : IOrderRepository
                 OrderType);
 
         public static DbPresentation FromModel(OrderAggregate aggregate)
-            => new(
-                aggregate.Id,
-                aggregate.OrderState,
-                JsonSerializer.Serialize(aggregate.Customer),
-                JsonSerializer.Serialize(aggregate.Goods),
-                aggregate.Customer.PhoneNumber,
-                aggregate.OrderedAt,
-                aggregate.OrderType,
-                aggregate.TotalPrice,
-                aggregate.TotalWeight,
-                aggregate.ItemsCount);
+            => new()
+            {
+                Id = aggregate.Id,
+                OrderState = aggregate.OrderState,
+                CustomerId = aggregate.Customer.Id,
+                Region = aggregate.Customer.Address.Region,
+                Customer = JsonSerializer.Serialize(aggregate.Customer),
+                Goods = JsonSerializer.Serialize(aggregate.Goods),
+                PhoneNumber = aggregate.Customer.PhoneNumber,
+                OrderedAt = aggregate.OrderedAt,
+                OrderType = aggregate.OrderType,
+                TotalPrice = aggregate.TotalPrice,
+                TotalWeight = aggregate.TotalWeight,
+                ItemsCount = aggregate.ItemsCount,
+            };
     };
 }

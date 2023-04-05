@@ -5,14 +5,21 @@ using Ozon.Route256.Five.OrderService.Services.Database.Migrator;
 namespace Ozon.Route256.Five.OrderService.Migrations;
 
 [Migration(04042023_2)]
-public class AddIndexingTable : BucketedMigration 
+public class ExtendOrderWithIndexAndFields : BucketedMigration 
 {
-    public AddIndexingTable(IOptions<MigratorConfiguration> migratorConfiguration) : base(migratorConfiguration)
+    public ExtendOrderWithIndexAndFields(IOptions<MigratorConfiguration> migratorConfiguration) : base(migratorConfiguration)
     {
     }
 
     protected override void UpBucketed(string bucketSchema)
     {
+        Alter.Table("Order")
+            .InSchema(bucketSchema)
+            .AddColumn("CustomerId")
+            .AsInt32()
+            .AddColumn("Region")
+            .AsString();
+        
         Create.Table("index_region_order")
             .InSchema(bucketSchema)
             .WithColumn("order_id").AsInt64().NotNullable()
@@ -50,11 +57,34 @@ public class AddIndexingTable : BucketedMigration
 
     protected override void DownBucketed(string bucketSchema)
     {
-        Delete.UniqueConstraint("unique_index_region_order")
+        Delete
+            .Column("CustomerId")
+            .Column("Region")
+            .FromTable("Order")
+            .InSchema(bucketSchema);
+
+        Delete.PrimaryKey("pk_index_region_order")
             .FromTable("index_region_order")
             .InSchema(bucketSchema);
+
+        Delete.Index("region_index_region_order")
+            .OnTable("index_region_order")
+            .InSchema(bucketSchema);
         
-        Delete.Table("index_region_order")
+        Delete
+            .Table("index_region_order")
+            .InSchema(bucketSchema);
+
+        Delete.PrimaryKey("pk_index_customer_order")
+            .FromTable("index_customer_order")
+            .InSchema(bucketSchema);
+        
+        Delete.Index("region_index_customer_order")
+            .OnTable("index_customer_order")
+            .InSchema(bucketSchema);
+
+        Delete
+            .Table("index_customer_order")
             .InSchema(bucketSchema);
     }
 }
